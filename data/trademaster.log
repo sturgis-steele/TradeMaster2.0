@@ -1,0 +1,66 @@
+2025-03-16 14:44:55,361 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 14:44:55,373 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 14:44:55,374 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 14:44:55,374 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 14:44:55,374 - TradeMaster.LLMEngine - WARNING - No Groq API key provided. LLM functionality will be limited.
+2025-03-16 14:45:42,678 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 14:45:42,682 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 14:45:42,682 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 14:45:42,682 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 14:45:43,306 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 14:45:43,308 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 14:45:43,321 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 14:45:43,322 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 14:45:43,322 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 14:45:43,322 - discord.client - INFO - logging in using static token
+2025-03-16 14:45:43,951 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 14:45:44,215 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0c398600f3188eb8dacb33f693725707).
+2025-03-16 14:45:46,240 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 14:45:46,240 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 14:54:27,830 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 14:54:28,388 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 14:54:28,388 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 14:54:28,388 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 14:54:29,025 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 14:54:29,027 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 14:54:29,032 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 14:54:29,032 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 14:54:29,032 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 14:54:29,033 - discord.client - INFO - logging in using static token
+2025-03-16 14:54:29,653 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 14:54:29,882 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2685475198908a0c6984baa2920ebd84).
+2025-03-16 14:54:31,887 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 14:54:31,887 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 15:07:05,742 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 15:07:06,308 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 15:07:06,308 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 15:07:06,308 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 15:07:45,390 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 15:07:45,934 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 15:07:45,934 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 15:07:45,934 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 15:07:46,572 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 15:07:46,574 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:07:46,579 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:07:46,579 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 15:07:46,579 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 15:07:46,579 - discord.client - INFO - logging in using static token
+2025-03-16 15:07:47,085 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 15:07:47,416 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f6026efe6edc754af27e7a47d3a97af2).
+2025-03-16 15:07:49,434 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 15:07:49,434 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 15:17:03,708 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 15:17:04,298 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 15:17:04,298 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 15:17:04,298 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 15:17:04,933 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 15:17:04,935 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:17:04,940 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:17:04,940 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 15:17:04,940 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 15:17:04,941 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 15:17:04,941 - discord.client - INFO - logging in using static token
+2025-03-16 15:17:05,662 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 15:17:05,905 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: fe04f9208d50832f624edbe264f6d91a).
+2025-03-16 15:17:07,895 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 15:17:07,896 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
