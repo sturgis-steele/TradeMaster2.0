@@ -47,7 +47,7 @@ class TradeMasterClient(commands.Bot):
         
         # Initialize the gatekeeper
         self.gatekeeper = Gatekeeper(
-            model_name="llama2",  # Specify your local model
+            model_name="gemma3:1b",  # Using available local model
             ollama_base_url="http://localhost:11434"  # Adjust as needed
         )
         logger.info("Initialized gatekeeper for message filtering")
@@ -118,22 +118,38 @@ class TradeMasterClient(commands.Bot):
                 self.user_contexts[user_id]
             )
             
-            # Log the gatekeeper's decision
-            logger.debug(f"Gatekeeper verdict: {verdict.should_respond} ({verdict.confidence:.2f}) - {verdict.reason}")
+            # Log the gatekeeper's decision at INFO level to ensure it's captured
+            logger.info(f"Gatekeeper verdict: {verdict.should_respond} ({verdict.confidence:.2f}) - {verdict.reason}")
+            # Also log at debug level for more detailed logs
+            logger.debug(f"Full gatekeeper verdict details: {verdict}")
             
             # Only process with the main LLM if the gatekeeper approves
             if verdict.should_respond:
                 # Show typing indicator while processing
                 async with message.channel.typing():
+                    # Log user_id type before passing to LLM engine
+                    logger.debug(f"Passing user_id to LLM engine: {user_id} (type: {type(user_id).__name__})")
+                    logger.debug(f"Context being passed to LLM engine: {list(self.user_contexts[user_id].keys())}")
+                    
                     # Call the main LLM engine to process the message
                     response, tool_used = await self.llm_engine.process_message(
                         message.content, 
-                        user_id=user_id,
+                        user_id=user_id,  # This is an integer from message.author.id
                         context=self.user_contexts[user_id]
                     )
                     
-                    # Send the response
-                    await message.reply(response)
+                    logger.debug(f"Received response from LLM engine: {response[:50]}...")
+                    
+                    # Send the response - try to reply, but fall back to regular send if permissions are missing
+                    try:
+                        await message.reply(response)
+                    except discord.errors.Forbidden as e:
+                        if e.code == 160002:  # Cannot reply without permission to read message history
+                            logger.warning("Cannot reply due to missing permissions, using channel.send instead")
+                            await message.channel.send(f"{message.author.mention} {response}")
+                        else:
+                            # Re-raise if it's a different permission issue
+                            raise
                     
                     # Update context with interaction info
                     self.user_contexts[user_id]["last_interaction_time"] = datetime.now().isoformat()

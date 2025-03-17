@@ -18,18 +18,11 @@ from dotenv import load_dotenv  # For loading API keys and secrets from a .env f
 # Import the main Discord bot client class from our bot module
 from bot.client import TradeMasterClient
 
-# Set up logging to keep track of what the bot is doing
-# This creates both a log file and prints messages to the console
-logging.basicConfig(
-    level=logging.INFO,  # Only show messages that are 'INFO' level or higher (ignores DEBUG messages)
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',  # Format: Time - Logger Name - Level - Message
-    handlers=[
-        logging.FileHandler("data/trademaster.log"),  # Save logs to this file
-        logging.StreamHandler()  # Also print logs to the console
-    ]
-)
-# Create a logger specifically for our bot
-logger = logging.getLogger("TradeMaster")
+# Import our custom logging setup
+from utils.logging import setup_logging
+
+# Set up logging using our custom configuration
+logger = setup_logging()
 
 # Load secret keys and configuration from the .env file
 load_dotenv("config/.env")

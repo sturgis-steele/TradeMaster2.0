@@ -40,12 +40,12 @@ class Gatekeeper:
     It uses a local LLM (Ollama) to make intelligent filtering decisions.
     """
     
-    def __init__(self, model_name="llama2", ollama_base_url="http://localhost:11434"):
+    def __init__(self, model_name="gemma3:1b", ollama_base_url="http://localhost:11434"):
         """
         Initialize the gatekeeper with a lightweight local model.
         
         Args:
-            model_name: The name of the Ollama model to use (default: "llama2")
+            model_name: The name of the Ollama model to use (default: "gemma3:1b")
             ollama_base_url: The base URL for the Ollama API (default: "http://localhost:11434")
         """
         # Initialize the Ollama model with LangChain
@@ -92,11 +92,61 @@ class Gatekeeper:
             
         logger.info("Gatekeeper initialized")
     
+    def _simple_heuristic_evaluation(self, message: str, context: Dict[str, Any]) -> MessageVerdict:
+        """
+        A simple rule-based fallback when Ollama is unavailable.
+        Uses basic heuristics to determine if a message needs a response.
+        
+        Args:
+            message: The message content to evaluate
+            context: The user's conversation context
+            
+        Returns:
+            A MessageVerdict with the decision
+        """
+        message_lower = message.lower()
+        
+        # Keywords that suggest trading/finance topics
+        finance_keywords = [
+            "trade", "trading", "stock", "crypto", "bitcoin", "eth", "market", 
+            "invest", "portfolio", "chart", "price", "bull", "bear", "token", 
+            "coin", "exchange", "buy", "sell", "profit", "loss", "analysis"
+        ]
+        
+        # Check if message directly addresses the bot
+        direct_address = any(term in message_lower for term in ["bot", "trademaster", "assistant"])
+        
+        # Check if message contains finance-related keywords
+        finance_related = any(keyword in message_lower for keyword in finance_keywords)
+        
+        # Check if message is a question
+        is_question = "?" in message or any(q_word in message_lower.split() for q_word in ["what", "how", "when", "why", "where", "who", "which"])
+        
+        # Recent interaction suggests continuing the conversation
+        recent_interaction = "last_interaction_time" in context
+        
+        # Determine if we should respond based on these factors
+        should_respond = direct_address or finance_related or (is_question and (finance_related or recent_interaction))
+        
+        if should_respond:
+            return MessageVerdict(
+                should_respond=True,
+                confidence=0.6,
+                reason="Simple heuristic evaluation determined this message needs a response"
+            )
+        else:
+            return MessageVerdict(
+                should_respond=False,
+                confidence=0.6,
+                reason="Simple heuristic evaluation determined this message does not need a response"
+            )
+    
     async def evaluate_message(self, message: str, user_id: str, 
                                context: Dict[str, Any]) -> MessageVerdict:
         """
         Evaluate a Discord message to determine if it requires a response.
         This method uses the Ollama model to make an intelligent decision.
+        If Ollama is unavailable, falls back to simple heuristics.
         
         Args:
             message: The message content to evaluate
@@ -111,12 +161,8 @@ class Gatekeeper:
         
         # Check if Ollama was properly initialized
         if not self.chain:
-            logger.error("Cannot evaluate message: Ollama model not initialized")
-            return MessageVerdict(
-                should_respond=True,  # Default to responding if we can't filter
-                confidence=0.5,
-                reason="Ollama model not available, defaulting to response"
-            )
+            logger.warning("Cannot evaluate message: Ollama model not initialized, using fallback heuristics")
+            return self._simple_heuristic_evaluation(message, context)
         
         try:
             # Run the LLM evaluation asynchronously to avoid blocking
@@ -127,13 +173,23 @@ class Gatekeeper:
             )
             
             # Parse the LLM's response
-            if "YES" in result.upper():
-                # Extract the confidence score if provided
-                confidence_match = re.search(r'(\d+\.\d+)', result)
-                confidence = float(confidence_match.group(1)) if confidence_match else 0.7
-                
-                # Extract the reason if provided
-                reason = result.split("reason:", 1)[-1].strip() if "reason:" in result.lower() else result
+            # Extract the confidence score if provided
+            confidence_match = re.search(r'(\d+\.\d+)', result)
+            confidence = float(confidence_match.group(1)) if confidence_match else 0.7
+            
+            # Extract the reason if provided
+            reason = result.split("reason:", 1)[-1].strip() if "reason:" in result.lower() else result
+            
+            # Check for contradictions in the response
+            # If the reason suggests it should respond despite a NO, override to YES
+            trading_keywords = ["trading", "market", "stock", "crypto", "invest", "finance", "question", "requires", "assistance"]
+            has_trading_keywords = any(keyword in reason.lower() for keyword in trading_keywords)
+            
+            # Determine if we should respond based on YES/NO and the reason content
+            if "YES" in result.upper() or has_trading_keywords:
+                # Log the decision at INFO level to ensure it's captured
+                logger.info(f"Message evaluation: SHOULD RESPOND ({confidence:.2f}) - {reason}")
+                logger.debug(f"Full LLM response: {result}")
                 
                 return MessageVerdict(
                     should_respond=True,
@@ -142,6 +198,9 @@ class Gatekeeper:
                 )
             else:
                 # LLM determined no response is needed
+                # Log the decision at INFO level to ensure it's captured
+                logger.info(f"Message evaluation: SHOULD NOT RESPOND - {result}")
+                
                 return MessageVerdict(
                     should_respond=False,
                     confidence=0.7,
@@ -150,12 +209,9 @@ class Gatekeeper:
         except Exception as e:
             # Log any errors with the LLM 
             logger.error(f"Error using Ollama for message evaluation: {e}")
-            # If there's an error, default to responding
-            return MessageVerdict(
-                should_respond=True,
-                confidence=0.5,
-                reason=f"Error in evaluation: {str(e)}"
-            )
+            # If there's an error, fall back to simple heuristics
+            logger.info("Falling back to simple heuristic evaluation")
+            return self._simple_heuristic_evaluation(message, context)
     
     def update_training_data(self, message: str, should_have_responded: bool):
         """

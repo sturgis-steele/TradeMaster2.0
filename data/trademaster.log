@@ -64,3 +64,639 @@
 2025-03-16 15:17:05,905 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: fe04f9208d50832f624edbe264f6d91a).
 2025-03-16 15:17:07,895 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
 2025-03-16 15:17:07,896 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 15:41:29,581 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 15:41:30,118 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 15:41:30,118 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 15:41:30,118 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 15:41:30,756 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 15:41:30,759 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:41:30,764 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 15:41:30,764 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 15:41:30,764 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 15:41:30,764 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 15:41:30,764 - discord.client - INFO - logging in using static token
+2025-03-16 15:41:31,415 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 15:41:31,658 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: cd9932bd6dde924ad8b0370c7bd69ecc).
+2025-03-16 15:41:33,666 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 15:41:33,666 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 15:53:28,834 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 15:53:29,009 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 8104280335001...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 15:53:29,120 - TradeMaster.Client - ERROR - Error processing message: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+2025-03-16 15:53:29,367 - discord.client - ERROR - Ignoring exception in on_message
+Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\bot\client.py", line 136, in on_message
+    await message.reply(response)
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\message.py", line 1869, in reply
+    return await self.channel.send(content, reference=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\abc.py", line 1644, in send
+    data = await state.http.send_message(channel.id, params=params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\http.py", line 756, in request
+    raise Forbidden(response, data)
+discord.errors.Forbidden: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\client.py", line 481, in _run_event
+    await coro(*args, **kwargs)
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\bot\client.py", line 151, in on_message
+    await message.reply("I encountered an error processing your request. Please try again later.")
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\message.py", line 1869, in reply
+    return await self.channel.send(content, reference=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\abc.py", line 1644, in send
+    data = await state.http.send_message(channel.id, params=params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\http.py", line 756, in request
+    raise Forbidden(response, data)
+discord.errors.Forbidden: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+2025-03-16 15:58:29,434 - discord.gateway - INFO - Shard ID None session has been invalidated.
+2025-03-16 15:58:34,658 - TradeMaster - ERROR - An unexpected error occurred while connecting to Discord: Shard ID None WebSocket closed with 4004
+2025-03-16 15:58:34,658 - TradeMaster - ERROR - Please check your internet connection and Discord's status.
+2025-03-16 16:05:49,407 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 16:05:49,952 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 16:05:49,952 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 16:05:49,953 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 16:05:50,586 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 16:05:50,587 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 16:05:50,592 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 16:05:50,592 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 16:05:50,592 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 16:05:50,592 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 16:05:50,592 - discord.client - INFO - logging in using static token
+2025-03-16 16:05:51,229 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 16:05:51,482 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 208baf4788819ea23a851f3142103421).
+2025-03-16 16:05:53,497 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 16:05:53,497 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 16:06:02,824 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 16:06:03,022 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 8104280335001...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 16:06:03,239 - TradeMaster.Client - ERROR - Error processing message: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+2025-03-16 16:06:03,364 - discord.client - ERROR - Ignoring exception in on_message
+Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\bot\client.py", line 136, in on_message
+    await message.reply(response)
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\message.py", line 1869, in reply
+    return await self.channel.send(content, reference=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\abc.py", line 1644, in send
+    data = await state.http.send_message(channel.id, params=params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\http.py", line 756, in request
+    raise Forbidden(response, data)
+discord.errors.Forbidden: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\client.py", line 481, in _run_event
+    await coro(*args, **kwargs)
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\bot\client.py", line 151, in on_message
+    await message.reply("I encountered an error processing your request. Please try again later.")
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\message.py", line 1869, in reply
+    return await self.channel.send(content, reference=self, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\abc.py", line 1644, in send
+    data = await state.http.send_message(channel.id, params=params)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\discord\http.py", line 756, in request
+    raise Forbidden(response, data)
+discord.errors.Forbidden: 403 Forbidden (error code: 160002): Cannot reply without permission to read message history
+2025-03-16 16:12:45,629 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 16:12:45,783 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 8104280335001...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 16:12:46,766 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 16:12:46,914 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 1349957356011...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 17:02:10,652 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 208baf4788819ea23a851f3142103421.
+2025-03-16 18:26:17,010 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 18:26:17,218 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 4805735511168...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 19:29:35,885 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 208baf4788819ea23a851f3142103421.
+2025-03-16 22:11:29,725 - discord.gateway - INFO - Shard ID None has successfully RESUMED session 208baf4788819ea23a851f3142103421.
+2025-03-16 22:32:15,104 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 22:32:15,654 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 22:32:15,654 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 22:32:15,654 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 22:32:16,333 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 22:32:16,335 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:32:16,340 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:32:16,340 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 22:32:16,341 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 22:32:16,341 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 22:32:16,341 - discord.client - INFO - logging in using static token
+2025-03-16 22:32:16,952 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 22:32:17,204 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6aafe813031c25cce7c3827996e29850).
+2025-03-16 22:32:19,228 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 22:32:19,228 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 22:32:30,475 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 22:32:30,476 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-16 22:32:30,570 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 6 validation errors for Task
+context.0.description
+  Field required [type=missing, input_value={'user_id': 810428033500184606}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.0.expected_output
+  Field required [type=missing, input_value={'user_id': 810428033500184606}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.1.description
+  Field required [type=missing, input_value={'message': 'hello trade bot'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.1.expected_output
+  Field required [type=missing, input_value={'message': 'hello trade bot'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.2.description
+  Field required [type=missing, input_value={'conversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.2.expected_output
+  Field required [type=missing, input_value={'conversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+2025-03-16 22:34:16,364 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 22:34:16,951 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 22:34:16,951 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 22:34:16,951 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 22:34:17,619 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 22:34:17,621 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:34:17,625 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:34:17,626 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 22:34:17,626 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 22:34:17,626 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 22:34:17,626 - discord.client - INFO - logging in using static token
+2025-03-16 22:34:18,173 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 22:34:18,444 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c27b987d39499dfa8ccc0b137e89b9f3).
+2025-03-16 22:34:20,458 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 22:34:20,458 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 22:34:34,517 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-16 22:34:34,517 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-16 22:34:34,697 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-16 22:46:07,098 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 22:46:07,667 - TradeMaster.Gatekeeper - INFO - Ollama model 'llama2' initialized successfully
+2025-03-16 22:46:07,667 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 22:46:07,667 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 22:46:08,352 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 22:46:08,354 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:46:08,358 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:46:08,358 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 22:46:08,358 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 22:46:08,359 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 22:46:08,359 - discord.client - INFO - logging in using static token
+2025-03-16 22:46:09,417 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 22:46:09,701 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7de0e7562f753a473f5b2f410eab7a2d).
+2025-03-16 22:46:11,754 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 22:46:11,755 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 22:47:36,340 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 404 Not Found"
+2025-03-16 22:47:36,340 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: model 'llama2' not found (status code: 404)
+2025-03-16 22:47:36,341 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-16 22:47:36,493 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'task'
+2025-03-16 22:51:07,865 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 404 Not Found"
+2025-03-16 22:51:07,865 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: model 'llama2' not found (status code: 404)
+2025-03-16 22:51:07,865 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-16 22:52:36,202 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 22:52:36,774 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 22:52:36,774 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 22:52:36,775 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 22:52:37,430 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 22:52:37,432 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:52:37,436 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:52:37,437 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 22:52:37,437 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 22:52:37,437 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 22:52:37,437 - discord.client - INFO - logging in using static token
+2025-03-16 22:52:37,988 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 22:52:38,277 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0f386b0bf6cda61d7d8b502a8f27b5e1).
+2025-03-16 22:52:40,294 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 22:52:40,295 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 22:52:50,811 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 22:54:56,218 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 22:54:56,811 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-16 22:57:37,438 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 22:57:37,991 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 22:57:37,991 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 22:57:37,991 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 22:57:38,637 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 22:57:38,639 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:57:38,643 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 22:57:38,643 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 22:57:38,644 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 22:57:38,644 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 22:57:38,644 - discord.client - INFO - logging in using static token
+2025-03-16 22:57:39,458 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 22:57:39,777 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: b975714fc6bee8c3f77ba34195a159b7).
+2025-03-16 22:57:41,793 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 22:57:41,794 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 22:57:53,554 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 22:57:54,104 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: str.format() argument after ** must be a mapping, not list
+2025-03-16 23:00:09,766 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:00:10,302 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:00:10,302 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:00:10,302 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:00:10,926 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:00:10,928 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:00:10,933 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:00:10,934 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:00:10,934 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:00:10,934 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:00:10,934 - discord.client - INFO - logging in using static token
+2025-03-16 23:00:11,509 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:00:12,860 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6e147d9d062be775699e4b01ba84cb09).
+2025-03-16 23:00:14,872 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:00:14,872 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:00:30,689 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:06:58,105 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:06:58,689 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:06:58,689 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:06:58,689 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:06:59,330 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:06:59,333 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:06:59,337 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:06:59,337 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:06:59,337 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:06:59,338 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:06:59,338 - discord.client - INFO - logging in using static token
+2025-03-16 23:07:00,070 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:07:00,324 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: c3d91724317bc89572795f5832142769).
+2025-03-16 23:07:02,351 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:07:02,351 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:07:10,158 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:07:10,506 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.95 reason: This is a simple greeting and doesn’t require a response from the AI.
+
+2025-03-16 23:07:10,506 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:07:10,506 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-16 23:07:28,953 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:07:29,289 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message explicitly asks for "the best trades today," which is directly related to trading and investment strategies.
+2025-03-16 23:07:29,290 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message explicitly asks for "the best trades today," which is directly related to trading and investment strategies.
+
+2025-03-16 23:07:29,290 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message explicitly asks for "the best trades today," which is directly related to trading and investment strategies.
+2025-03-16 23:07:29,290 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message explicitly asks for "the best trades today," which is directly related to trading and investment strategies.'
+2025-03-16 23:07:29,605 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 8104280335001...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 23:08:27,381 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:08:27,710 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.90 reason: This is a generic greeting and doesn’t indicate any trading activity or request for assistance.
+2025-03-16 23:08:27,710 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:08:27,710 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-16 23:09:00,110 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:09:00,690 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:09:00,691 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:09:00,691 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:09:01,317 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:09:01,320 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:09:01,324 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:09:01,324 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:09:01,325 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:09:01,325 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:09:01,325 - discord.client - INFO - logging in using static token
+2025-03-16 23:09:01,877 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:09:02,095 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 2240933b4b090f5edf65953fb8b28042).
+2025-03-16 23:09:04,109 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:09:04,110 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:09:09,315 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:09:09,693 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message explicitly asks for "best trades that I can make todaty," directly requesting actionable advice from the bot.
+2025-03-16 23:09:09,694 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message explicitly asks for "best trades that I can make todaty," directly requesting actionable advice from the bot.
+
+2025-03-16 23:09:09,694 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message explicitly asks for "best trades that I can make todaty," directly requesting actionable advice from the bot.
+2025-03-16 23:09:09,694 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message explicitly asks for "best trades that I can make todaty," directly requesting actionable advice from the bot.'
+2025-03-16 23:09:09,842 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 6 validation errors for Task
+context.0.description
+  Field required [type=missing, input_value={'user_id': 810428033500184606}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.0.expected_output
+  Field required [type=missing, input_value={'user_id': 810428033500184606}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.1.description
+  Field required [type=missing, input_value={'message': 'what are the...that i can make todaty'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.1.expected_output
+  Field required [type=missing, input_value={'message': 'what are the...that i can make todaty'}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.2.description
+  Field required [type=missing, input_value={'conversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+context.2.expected_output
+  Field required [type=missing, input_value={'conversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/missing
+2025-03-16 23:10:55,176 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:10:55,726 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:10:55,726 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:10:55,726 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:10:56,367 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:10:56,369 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:10:56,374 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:10:56,374 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:10:56,374 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:10:56,374 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:10:56,375 - discord.client - INFO - logging in using static token
+2025-03-16 23:10:57,158 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:10:57,567 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: be3d3bf1f4d88447196e442e6d2a3ab2).
+2025-03-16 23:10:59,564 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:10:59,564 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:11:14,876 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:11:15,025 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:11:15,263 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.95 reason: This message is a direct request for an update, which is a standard function of the bot.
+
+2025-03-16 23:11:15,264 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:11:15,264 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-16 23:11:15,454 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message directly asks the bot to acknowledge a recent action (level 3 advancement) within the context of trading.
+2025-03-16 23:11:15,455 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message directly asks the bot to acknowledge a recent action (level 3 advancement) within the context of trading.
+
+2025-03-16 23:11:15,455 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message directly asks the bot to acknowledge a recent action (level 3 advancement) within the context of trading.
+2025-03-16 23:11:15,456 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message directly asks the bot to acknowledge a recent action (level 3 advancement) within the context of trading.'
+2025-03-16 23:11:15,647 - TradeMaster.LLMEngine - INFO - Processing message with LLM: GG <@810428033500184606>, you just advanced to lev...
+2025-03-16 23:11:15,654 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: str.format() argument after ** must be a mapping, not list
+2025-03-16 23:11:15,654 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: str.format() argument after ** must be a mapping, not list
+2025-03-16 23:15:51,591 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:15:52,138 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:15:52,139 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:15:52,139 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:15:52,758 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:15:52,759 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:15:52,765 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:15:52,765 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:15:52,765 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:15:52,765 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:15:52,766 - discord.client - INFO - logging in using static token
+2025-03-16 23:15:53,505 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:15:53,857 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 6ef7df593f95f0de78a2e1ffb34ef8da).
+2025-03-16 23:15:55,870 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:15:55,871 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:16:06,198 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:16:06,528 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.95 reason: This message is a straightforward question about trading and requires the bot’s assistance in providing an answer.
+
+2025-03-16 23:16:06,529 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:16:06,529 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-16 23:20:22,822 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:20:23,401 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:20:23,401 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:20:23,401 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:20:24,054 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:20:24,057 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:20:24,063 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:20:24,063 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:20:24,063 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:20:24,063 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:20:24,063 - discord.client - INFO - logging in using static token
+2025-03-16 23:20:25,685 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:20:25,915 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: ef4e9010ff9db18343ad44bd65d28bcd).
+2025-03-16 23:20:27,928 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:20:27,928 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:20:32,691 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:20:33,036 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - This message is a straightforward question about trading and requires a response from the AI to provide relevant information.
+2025-03-16 23:20:33,036 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: NO 0.95 reason: This message is a straightforward question about trading and requires a response from the AI to provide relevant information.
+2025-03-16 23:20:33,036 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - This message is a straightforward question about trading and requires a response from the AI to provide relevant information.
+2025-03-16 23:20:33,036 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='This message is a straightforward question about trading and requires a response from the AI to provide relevant information.'
+2025-03-16 23:20:33,146 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context
+  Input should be a valid list [type=list_type, input_value={'user_id': 8104280335001...nversation_history': []}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.10/v/list_type
+2025-03-16 23:24:14,639 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:24:15,187 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:24:15,188 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:24:15,188 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:24:15,832 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:24:15,834 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:24:15,838 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:24:15,839 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:24:15,839 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:24:15,839 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:24:15,839 - discord.client - INFO - logging in using static token
+2025-03-16 23:24:16,381 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:24:16,641 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 0a19e663e6338d6f65bf4c90e90f34f6).
+2025-03-16 23:24:18,672 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:24:18,673 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:24:26,993 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:24:27,300 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message is a straightforward question about trading, requiring a response from the AI.
+2025-03-16 23:24:27,300 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: NO 0.95 reason: The message is a straightforward question about trading, requiring a response from the AI.
+
+2025-03-16 23:24:27,301 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message is a straightforward question about trading, requiring a response from the AI.
+2025-03-16 23:24:27,301 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message is a straightforward question about trading, requiring a response from the AI.'
+2025-03-16 23:24:27,441 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: 1 validation error for Task
+context.0.expected_output
+  Input should be a valid string [type=string_type, input_value=810428033500184606, input_type=int]
+    For further information visit https://errors.pydantic.dev/2.10/v/string_type
+2025-03-16 23:27:35,579 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:27:36,157 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:27:36,157 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:27:36,157 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:27:36,817 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:27:36,819 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:27:36,824 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:27:36,824 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:27:36,824 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:27:36,824 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:27:36,824 - discord.client - INFO - logging in using static token
+2025-03-16 23:27:37,354 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:27:37,624 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: e55aef546ac50688476d01fab12aa473).
+2025-03-16 23:27:39,644 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:27:39,644 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:27:42,992 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:27:43,407 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.90 reason: The message is a simple greeting and asks for advice, not a request for a response.
+
+2025-03-16 23:27:43,407 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:27:43,407 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-16 23:27:58,126 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:27:58,413 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:27:58,413 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+
+2025-03-16 23:27:58,413 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:27:58,413 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message explicitly asks for trading advice, indicating a need for the bot’s assistance.'
+2025-03-16 23:27:58,561 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-16 23:27:58,561 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-16 23:27:58,561 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-16 23:27:58,561 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-16 23:27:58,561 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-16 23:27:58,561 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-16 23:27:58,561 - TradeMaster.LLMEngine - DEBUG - Final context_list has 4 items
+2025-03-16 23:27:58,562 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-16 23:27:58,562 - TradeMaster.LLMEngine - INFO - Processing message with LLM: what trades should i make today...
+2025-03-16 23:27:58,562 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-16 23:27:58,568 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: str.format() argument after ** must be a mapping, not list
+2025-03-16 23:27:58,568 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:27:58,569 - TradeMaster.LLMEngine - ERROR - Exception args: ('str.format() argument after ** must be a mapping, not list',)
+2025-03-16 23:27:58,569 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: str.format() argument after ** must be a mapping, not list
+2025-03-16 23:27:58,569 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:27:58,569 - TradeMaster.LLMEngine - ERROR - Exception args: ('str.format() argument after ** must be a mapping, not list',)
+2025-03-16 23:27:58,595 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 178, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 180, in <lambda>
+    lambda: self.crew.kickoff([task])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 552, in kickoff
+    self._interpolate_inputs(inputs)
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 1122, in _interpolate_inputs
+    agent.interpolate_inputs(inputs)
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\agent_builder\base_agent.py", line 327, in interpolate_inputs
+    self.role = self._original_role.format(**inputs)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: str.format() argument after ** must be a mapping, not list
+
+2025-03-16 23:27:58,596 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-16 23:30:33,962 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:30:34,499 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:30:34,499 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:30:34,499 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:30:35,141 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:30:35,143 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:30:35,148 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:30:35,148 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:30:35,148 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:30:35,148 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:30:35,148 - discord.client - INFO - logging in using static token
+2025-03-16 23:30:35,653 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:30:35,936 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: d9596bc93695c1f830e509c528821a2c).
+2025-03-16 23:30:37,950 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:30:37,951 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:31:01,251 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:31:01,579 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:31:01,580 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+
+2025-03-16 23:31:01,580 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:31:01,580 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message explicitly asks for trading advice, indicating a need for the bot’s assistance.'
+2025-03-16 23:31:01,739 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-16 23:31:01,739 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-16 23:31:01,740 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-16 23:31:01,740 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-16 23:31:01,740 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-16 23:31:01,740 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 4 items
+2025-03-16 23:31:01,740 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-16 23:31:01,741 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-16 23:31:01,741 - TradeMaster.LLMEngine - INFO - Processing message with LLM: what trades should i make today...
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: Crew.kickoff() got multiple values for argument 'inputs'
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got multiple values for argument 'inputs'",)
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got multiple values for argument 'inputs'
+2025-03-16 23:31:01,742 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:31:01,743 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got multiple values for argument 'inputs'",)
+2025-03-16 23:31:01,743 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff([task], inputs=crew_inputs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Crew.kickoff() got multiple values for argument 'inputs'
+
+2025-03-16 23:31:01,744 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-16 23:39:01,450 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-16 23:39:02,016 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-16 23:39:02,016 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-16 23:39:02,016 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-16 23:39:02,660 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-16 23:39:02,662 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:39:02,667 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-16 23:39:02,667 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-16 23:39:02,668 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-16 23:39:02,668 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-16 23:39:02,668 - discord.client - INFO - logging in using static token
+2025-03-16 23:39:03,281 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-16 23:39:03,650 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 70a7d60bef6bfa784f70f6aa389837b2).
+2025-03-16 23:39:05,669 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-16 23:39:05,670 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-16 23:39:15,982 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:39:16,337 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD RESPOND (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:39:16,338 - TradeMaster.Gatekeeper - DEBUG - Full LLM response: YES 0.95 reason: The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+
+2025-03-16 23:39:16,338 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.95) - The message explicitly asks for trading advice, indicating a need for the bot’s assistance.
+2025-03-16 23:39:16,338 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.95 reason='The message explicitly asks for trading advice, indicating a need for the bot’s assistance.'
+2025-03-16 23:39:16,438 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-16 23:39:16,438 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-16 23:39:16,438 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-16 23:39:16,438 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-16 23:39:16,439 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-16 23:39:16,439 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 4 items
+2025-03-16 23:39:16,439 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-16 23:39:16,440 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-16 23:39:16,440 - TradeMaster.LLMEngine - INFO - Processing message with LLM: what trades should i make today...
+2025-03-16 23:39:16,440 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-16 23:39:16,441 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-16 23:39:16,441 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:39:16,441 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-16 23:39:16,441 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-16 23:39:16,441 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-16 23:39:16,442 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-16 23:39:16,442 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs, tasks=[task])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
+
+2025-03-16 23:39:16,443 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-16 23:41:40,762 - httpx - INFO - HTTP Request: POST http://localhost:11434/api/generate "HTTP/1.1 200 OK"
+2025-03-16 23:41:41,113 - TradeMaster.Gatekeeper - INFO - Message evaluation: SHOULD NOT RESPOND - NO 0.95 reason: This message is a casual statement about sleep and doesn't require a response from the bot.
+2025-03-16 23:41:41,113 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.70) - Ollama model determined no response needed
+2025-03-16 23:41:41,113 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.7 reason='Ollama model determined no response needed'
+2025-03-17 10:15:36,842 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-17 10:15:37,466 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-17 10:15:37,466 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-17 10:15:37,466 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-17 10:15:38,220 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-17 10:15:38,221 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:15:38,240 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:15:38,240 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-17 10:15:38,240 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-17 10:15:38,240 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-17 10:15:38,241 - discord.client - INFO - logging in using static token
+2025-03-17 10:15:38,851 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-17 10:15:39,205 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 06ed73ab1c72cb9f5663f9e205dbc1a6).
+2025-03-17 10:15:41,225 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-17 10:15:41,226 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-17 10:15:46,547 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:15:46,547 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:15:46,547 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.60) - Simple heuristic evaluation determined this message needs a response
+2025-03-17 10:15:46,547 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.6 reason='Simple heuristic evaluation determined this message needs a response'
+2025-03-17 10:15:46,686 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-17 10:15:46,686 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-17 10:15:46,686 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-17 10:15:46,686 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-17 10:15:46,686 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-17 10:15:46,687 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 4 items
+2025-03-17 10:15:46,687 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-17 10:15:46,688 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-17 10:15:46,688 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ai bot what are the best trades today...
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-17 10:15:46,689 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-17 10:15:46,691 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs, tasks=[task])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
+
+2025-03-17 10:15:46,692 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
