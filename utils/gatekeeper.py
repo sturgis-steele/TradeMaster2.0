@@ -10,15 +10,22 @@
 # - LangChain: Uses LangChain library for LLM integration
 
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional, List
 import asyncio
 from pydantic import BaseModel, Field
 import re
+import requests
+import os
 
 # LangChain imports for integrating with Ollama (local LLM)
-from langchain_ollama import OllamaLLM
-from langchain.prompts import PromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+try:
+    from langchain_ollama import OllamaLLM
+    from langchain.prompts import PromptTemplate
+    from langchain_core.runnables import RunnablePassthrough
+    LANGCHAIN_AVAILABLE = True
+except ImportError:
+    LANGCHAIN_AVAILABLE = False
+    logging.warning("LangChain not available. Falling back to heuristic evaluation.")
 
 # Set up logging for this module
 logger = logging.getLogger("TradeMaster.Gatekeeper")
@@ -37,7 +44,8 @@ class Gatekeeper:
     The Gatekeeper analyzes all Discord messages to determine if they warrant
     the attention of the main LLM. This saves costs by only forwarding relevant messages.
     
-    It uses a local LLM (Ollama) to make intelligent filtering decisions.
+    It uses a local LLM (Ollama) to make intelligent filtering decisions, with
+    fallback to heuristic evaluation if Ollama is unavailable.
     """
     
     def __init__(self, model_name="gemma3:1b", ollama_base_url="http://localhost:11434"):
@@ -48,10 +56,89 @@ class Gatekeeper:
             model_name: The name of the Ollama model to use (default: "gemma3:1b")
             ollama_base_url: The base URL for the Ollama API (default: "http://localhost:11434")
         """
-        # Initialize the Ollama model with LangChain
+        self.model_name = model_name
+        self.ollama_base_url = ollama_base_url
+        self.chain = None
+        self.ollama = None
+        
+        # Store the available models from Ollama (if reachable)
+        self.available_models: List[str] = []
+        
+        # Check if LangChain is available
+        if not LANGCHAIN_AVAILABLE:
+            logger.warning("LangChain is not available. Gatekeeper will use heuristic evaluation only.")
+            return
+        
+        # Try to initialize Ollama and get available models
         try:
+            # Check if Ollama is running and get available models
+            if self._check_ollama_connection():
+                self._initialize_ollama()
+            else:
+                logger.warning(f"Ollama not available at {ollama_base_url}. Using fallback heuristics.")
+        except Exception as e:
+            logger.error(f"Error during Gatekeeper initialization: {e}")
+            
+        logger.info("Gatekeeper initialized")
+    
+    def _check_ollama_connection(self) -> bool:
+        """
+        Check if Ollama is running and get available models.
+        
+        Returns:
+            bool: True if Ollama is running, False otherwise
+        """
+        try:
+            # Try to connect to Ollama
+            response = requests.get(f"{self.ollama_base_url}/api/tags", timeout=5)
+            
+            if response.status_code == 200:
+                # Get available models
+                models_data = response.json()
+                if "models" in models_data:
+                    self.available_models = [model["name"] for model in models_data["models"]]
+                else:
+                    # Older Ollama API returns different format
+                    self.available_models = [model["name"] for model in models_data]
+                
+                logger.info(f"Available Ollama models: {', '.join(self.available_models)}")
+                return True
+            else:
+                logger.warning(f"Failed to get models from Ollama: {response.status_code}")
+                return False
+        except requests.exceptions.RequestException as e:
+            logger.warning(f"Failed to connect to Ollama: {e}")
+            return False
+    
+    def _initialize_ollama(self) -> None:
+        """
+        Initialize the Ollama model with LangChain.
+        
+        This method initializes the Ollama model and creates a prompt template
+        for message evaluation.
+        """
+        try:
+            # Check if the requested model is available
+            if self.model_name not in self.available_models:
+                # Try to find an alternative model
+                alternative_models = ["gemma", "mistral", "llama", "tinyllama", "phi"]
+                for model_prefix in alternative_models:
+                    alternative = next((m for m in self.available_models if model_prefix in m.lower()), None)
+                    if alternative:
+                        logger.info(f"Requested model '{self.model_name}' not available. Using '{alternative}' instead.")
+                        self.model_name = alternative
+                        break
+                else:
+                    # If no alternative is found, use the first available model
+                    if self.available_models:
+                        self.model_name = self.available_models[0]
+                        logger.info(f"Using available model: {self.model_name}")
+                    else:
+                        logger.warning("No models available in Ollama. Using fallback heuristics.")
+                        return
+            
             # Create an instance of the Ollama model
-            self.ollama = OllamaLLM(model=model_name, base_url=ollama_base_url)
+            self.ollama = OllamaLLM(model=self.model_name, base_url=self.ollama_base_url)
             
             # Create a prompt template that instructs the model how to evaluate messages
             self.prompt_template = PromptTemplate(
@@ -81,16 +168,14 @@ class Gatekeeper:
                 """
             )
             
-            # Create the chain using RunnableSequence pattern instead of LLMChain
+            # Create the chain using RunnableSequence pattern
             self.chain = self.prompt_template | self.ollama
-            logger.info(f"Ollama model '{model_name}' initialized successfully")
+            logger.info(f"Ollama model '{self.model_name}' initialized successfully")
         except Exception as e:
             # Log the error if Ollama initialization fails
             logger.error(f"Failed to initialize Ollama model: {e}")
             # Set chain to None to indicate initialization failed
             self.chain = None
-            
-        logger.info("Gatekeeper initialized")
     
     def _simple_heuristic_evaluation(self, message: str, context: Dict[str, Any]) -> MessageVerdict:
         """
@@ -110,11 +195,14 @@ class Gatekeeper:
         finance_keywords = [
             "trade", "trading", "stock", "crypto", "bitcoin", "eth", "market", 
             "invest", "portfolio", "chart", "price", "bull", "bear", "token", 
-            "coin", "exchange", "buy", "sell", "profit", "loss", "analysis"
+            "coin", "exchange", "buy", "sell", "profit", "loss", "analysis",
+            "indicator", "candle", "trend", "support", "resistance", "volume",
+            "dividend", "etf", "fund", "option", "futures", "forex", "hedge",
+            "leverage", "margin", "liquidity", "volatility", "arbitrage"
         ]
         
         # Check if message directly addresses the bot
-        direct_address = any(term in message_lower for term in ["bot", "trademaster", "assistant"])
+        direct_address = any(term in message_lower for term in ["bot", "trademaster", "assistant", "@trademaster"])
         
         # Check if message contains finance-related keywords
         finance_related = any(keyword in message_lower for keyword in finance_keywords)
@@ -128,18 +216,25 @@ class Gatekeeper:
         # Determine if we should respond based on these factors
         should_respond = direct_address or finance_related or (is_question and (finance_related or recent_interaction))
         
-        if should_respond:
-            return MessageVerdict(
-                should_respond=True,
-                confidence=0.6,
-                reason="Simple heuristic evaluation determined this message needs a response"
-            )
+        # Calculate confidence based on the number of signals
+        confidence_signals = sum([direct_address, finance_related, is_question and recent_interaction])
+        confidence = min(0.5 + (confidence_signals * 0.15), 0.95)  # Scale between 0.5 and 0.95
+        
+        # Determine reason based on the triggered conditions
+        if direct_address:
+            reason = "User directly addressed the bot"
+        elif finance_related:
+            reason = "Message contains finance/trading related keywords"
+        elif is_question and recent_interaction:
+            reason = "Question in an ongoing conversation"
         else:
-            return MessageVerdict(
-                should_respond=False,
-                confidence=0.6,
-                reason="Simple heuristic evaluation determined this message does not need a response"
-            )
+            reason = "Message does not appear to require the bot's attention"
+        
+        return MessageVerdict(
+            should_respond=should_respond,
+            confidence=confidence,
+            reason=reason
+        )
     
     async def evaluate_message(self, message: str, user_id: str, 
                                context: Dict[str, Any]) -> MessageVerdict:
@@ -156,12 +251,28 @@ class Gatekeeper:
         Returns:
             A MessageVerdict object with the decision on whether to respond
         """
+        # If the message is too short, it's likely not meaningful enough for a response
+        if len(message.strip()) < 2:
+            return MessageVerdict(
+                should_respond=False,
+                confidence=0.9,
+                reason="Message is too short to require a response"
+            )
+        
+        # Direct mentions/commands should always get a response
+        if "@trademaster" in message.lower() or message.strip().startswith("!"):
+            return MessageVerdict(
+                should_respond=True,
+                confidence=0.95,
+                reason="Direct mention or command to the bot"
+            )
+        
         # Format the context as a string for the LLM
         context_str = ", ".join([f"{k}: {v}" for k, v in context.items()])
         
         # Check if Ollama was properly initialized
-        if not self.chain:
-            logger.warning("Cannot evaluate message: Ollama model not initialized, using fallback heuristics")
+        if not self.chain or not self.ollama:
+            logger.info("Using heuristic evaluation (Ollama not initialized)")
             return self._simple_heuristic_evaluation(message, context)
         
         try:
@@ -173,12 +284,16 @@ class Gatekeeper:
             )
             
             # Parse the LLM's response
+            # Extract YES/NO decision
+            should_respond = "YES" in result.upper()
+            
             # Extract the confidence score if provided
             confidence_match = re.search(r'(\d+\.\d+)', result)
             confidence = float(confidence_match.group(1)) if confidence_match else 0.7
             
             # Extract the reason if provided
-            reason = result.split("reason:", 1)[-1].strip() if "reason:" in result.lower() else result
+            reason_match = re.search(r'reason:(.*?)(?:\n|$)', result.lower(), re.DOTALL)
+            reason = reason_match.group(1).strip() if reason_match else result
             
             # Check for contradictions in the response
             # If the reason suggests it should respond despite a NO, override to YES
@@ -186,7 +301,7 @@ class Gatekeeper:
             has_trading_keywords = any(keyword in reason.lower() for keyword in trading_keywords)
             
             # Determine if we should respond based on YES/NO and the reason content
-            if "YES" in result.upper() or has_trading_keywords:
+            if should_respond or has_trading_keywords:
                 # Log the decision at INFO level to ensure it's captured
                 logger.info(f"Message evaluation: SHOULD RESPOND ({confidence:.2f}) - {reason}")
                 logger.debug(f"Full LLM response: {result}")
@@ -203,8 +318,8 @@ class Gatekeeper:
                 
                 return MessageVerdict(
                     should_respond=False,
-                    confidence=0.7,
-                    reason="Ollama model determined no response needed"
+                    confidence=confidence if confidence_match else 0.7,
+                    reason=reason if reason != result else "Ollama model determined no response needed"
                 )
         except Exception as e:
             # Log any errors with the LLM 

@@ -10,18 +10,28 @@
 
 import logging
 import os
-from typing import Dict, Any, Tuple, List, Optional
+from typing import Dict, Any, Tuple, List, Optional, Union
 import asyncio
+import json
+import traceback
 
 # LangChain and Crew AI imports
-from langchain_groq import ChatGroq
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.schema import SystemMessage, HumanMessage
-from langchain_core.messages import AIMessage
-from langchain.tools import BaseTool
-
-# Crew AI imports
-from crewai import Agent, Task, Crew, Process
+try:
+    from langchain_groq import ChatGroq
+    from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
+    from langchain.schema import SystemMessage, HumanMessage
+    from langchain_core.messages import AIMessage
+    from langchain.tools import BaseTool
+    
+    # Crew AI imports
+    from crewai import Agent, Task, Crew, Process
+    
+    LANGCHAIN_AVAILABLE = True
+    CREW_AVAILABLE = True
+except ImportError as e:
+    LANGCHAIN_AVAILABLE = False
+    CREW_AVAILABLE = False
+    logging.error(f"Required packages not installed: {e}")
 
 # Set up logging for this module
 logger = logging.getLogger("TradeMaster.LLMEngine")
@@ -42,50 +52,83 @@ class LLMEngine:
         """
         # Get API key from environment if not provided
         self.api_key = api_key or os.getenv("GROQ_API_KEY")
-        if not self.api_key:
-            logger.warning("No Groq API key provided. LLM functionality will be limited.")
-        
-        # Initialize the Groq LLM
-        self.llm = ChatGroq(
-            groq_api_key=self.api_key,
-            model_name="llama3-70b-8192",  # Can be configured based on needs
-            temperature=0.7,
-            max_tokens=1024
-        )
-        logger.info("Initialized Groq LLM")
+        self.llm = None
+        self.trading_agent = None
+        self.crew = None
+        self.task = None
         
         # Initialize tools registry - will be populated with available tools
         self.tools: List[BaseTool] = []
         
-        # Initialize the agent and crew
-        self._initialize_crew()
-        logger.info("Built agent workflow with Crew AI")
+        # Check if required packages are available
+        if not LANGCHAIN_AVAILABLE or not CREW_AVAILABLE:
+            logger.error("LangChain or CrewAI not available. LLM functionality will be limited.")
+            return
+        
+        # Check if API key is available
+        if not self.api_key:
+            logger.warning("No Groq API key provided. LLM functionality will be limited.")
+            return
+        
+        try:
+            # Initialize the Groq LLM
+            model_name = os.getenv("GROQ_MODEL", "llama3-70b-8192")
+            self.llm = ChatGroq(
+                groq_api_key=self.api_key,
+                model_name=model_name,
+                temperature=0.7,
+                max_tokens=1024
+            )
+            logger.info(f"Initialized Groq LLM with model {model_name}")
+            
+            # Initialize the agent and crew
+            self._initialize_crew()
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize LLM engine: {e}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
     
     def _initialize_crew(self) -> None:
         """
         Initialize the Crew AI agent and workflow.
         This defines the decision-making process of the agent.
         """
-        # Define the system prompt for the agent
-        system_prompt = "You are TradeMaster, an AI assistant specialized in trading, investing, and financial markets. You help users with trading strategies, market analysis, and financial education. When responding to users: 1. Be concise, accurate, and helpful 2. Use data and facts from your tools to support your statements 3. Use appropriate tools when needed to provide better assistance"
-        
-        # Create the main trading assistant agent
-        # Use a role without format placeholders to avoid string interpolation issues
-        self.trading_agent = Agent(
-            role="Trading Assistant",  # Simple role without format placeholders
-            goal="Provide helpful, accurate information about trading cryptocurrency and financial markets",
-            backstory="You are an expert in trading, investing, and financial markets with years of experience helping traders make informed decisions.",
-            verbose=True,
-            llm=self.llm,
-            tools=self.tools
-        )
-        
-        # Create the crew with our agent
-        self.crew = Crew(
-            agents=[self.trading_agent],
-            process=Process.sequential,  # Use sequential process for single agent
-            verbose=True
-        )
+        try:
+            # Define the system prompt for the agent
+            system_prompt = "You are TradeMaster, an AI assistant specialized in trading, investing, and financial markets. You help users with trading strategies, market analysis, and financial education. When responding to users: 1. Be concise, accurate, and helpful 2. Use data and facts from your tools to support your statements 3. Use appropriate tools when needed to provide better assistance"
+            
+            # Create the main trading assistant agent
+            self.trading_agent = Agent(
+                role="Trading Assistant",
+                goal="Provide helpful, accurate information about trading cryptocurrency and financial markets",
+                backstory="You are an expert in trading, investing, and financial markets with years of experience helping traders make informed decisions.",
+                verbose=True,
+                llm=self.llm,
+                tools=self.tools
+            )
+            
+            # Create a default task that will be used as a template
+            self.task = Task(
+                description="Respond to user messages about trading and finance",
+                expected_output="A helpful response to the user's query",
+                agent=self.trading_agent
+            )
+            
+            # Create the crew with our agent
+            self.crew = Crew(
+                agents=[self.trading_agent],
+                process=Process.sequential,  # Use sequential process for single agent
+                verbose=True,
+                tasks=[self.task]  # Add the template task to the crew
+            )
+            
+            logger.info("Built agent workflow with Crew AI")
+            
+        except Exception as e:
+            logger.error(f"Failed to initialize Crew AI workflow: {e}")
+            logger.error(f"Traceback: {traceback.format_exc()}")
+            self.trading_agent = None
+            self.crew = None
     
     def register_tool(self, tool: BaseTool) -> None:
         """
@@ -94,121 +137,154 @@ class LLMEngine:
         Args:
             tool: The tool to register
         """
-        self.tools.append(tool)
-        logger.info(f"Registered tool: {tool.name}")
-        
-        # Rebuild the crew with the new tool
-        self._initialize_crew()
+        try:
+            self.tools.append(tool)
+            logger.info(f"Registered tool: {tool.name}")
+            
+            # Rebuild the crew with the new tool
+            if LANGCHAIN_AVAILABLE and CREW_AVAILABLE and self.llm:
+                self._initialize_crew()
+        except Exception as e:
+            logger.error(f"Failed to register tool {tool.name}: {e}")
     
-    async def process_message(self, message: str, user_id: Any, context: Dict[str, Any]) -> Tuple[str, Optional[str]]:
-        # Changed parameter type to Any to handle both string and integer user_ids
+    async def process_message(self, message: str, user_id: Union[str, int], context: Dict[str, Any]) -> Tuple[str, Optional[str]]:
         """
         Process a message from a user and generate a response.
         This is the main entry point for the LLM engine.
         
         Args:
             message: The user's message content
-            user_id: The Discord user ID
+            user_id: The Discord user ID (string or integer)
             context: The user's conversation context
             
         Returns:
             A tuple of (response_text, tool_used)
         """
+        # Default fallback response if things go wrong
+        fallback_response = "I'm having trouble processing your request right now. Please try again later."
+        
+        # If LangChain or CrewAI are not available, provide a fallback response
+        if not LANGCHAIN_AVAILABLE or not CREW_AVAILABLE:
+            logger.error("LangChain or CrewAI not available. Cannot process message.")
+            return fallback_response, None
+        
+        # If LLM or Crew is not initialized, provide a fallback response
+        if not self.llm or not self.crew or not self.trading_agent:
+            logger.error("LLM engine not properly initialized. Cannot process message.")
+            return fallback_response, None
+            
         try:
             # Log the incoming parameters for debugging
             logger.debug(f"Processing message for user_id: {user_id} (type: {type(user_id).__name__})")
             logger.debug(f"Context keys: {list(context.keys())}")
             
-            # Create a task for the agent to process the message
-            # Crew AI expects inputs as a dictionary for string interpolation, not a list
-            # Convert the context dictionary to a format Crew AI can use
+            # Create a simplified task for this specific message
+            task_description = f"Respond to the following message from user {user_id}: {message}"
             
-            # Create a dictionary for Crew AI inputs
+            # Convert user_id to string (CrewAI sometimes has issues with non-string values)
+            safe_user_id = str(user_id)
+            
+            # Create crew inputs dictionary with safe string conversions
             crew_inputs = {
-                "user_id": str(user_id),  # Convert user_id to string to avoid validation errors
+                "user_id": safe_user_id,
                 "message": message,
-                "conversation_history": str(context.get("conversation_history", []))
+                "task_description": task_description
             }
             
-            # Add any additional context items from the context dictionary
+            # Add safe context items
             for key, value in context.items():
-                if key not in ["conversation_history"]:
-                    # Ensure all values are properly converted to strings
-                    crew_inputs[key] = str(value)
-                    logger.debug(f"Added context item: {key} (type: {type(value).__name__})")
+                if key != "conversation_history":
+                    try:
+                        if isinstance(value, (dict, list)):
+                            crew_inputs[key] = json.dumps(value)
+                        else:
+                            crew_inputs[key] = str(value)
+                    except:
+                        # Skip problematic values
+                        pass
             
-            logger.debug(f"Created crew_inputs with {len(crew_inputs)} items")
-            
-            # Create a context list for the Task object
-            # This is different from the inputs used for string interpolation
-            context_list = [
-                {
-                    "description": "User ID",
-                    "expected_output": str(user_id)
-                },
-                {
-                    "description": "User message",
-                    "expected_output": message
-                },
-                {
-                    "description": "Conversation history",
-                    "expected_output": str(context.get("conversation_history", []))
-                }
-            ]
-            
-            logger.debug(f"Created context_list with {len(context_list)} initial items")
-            
-            # Create the task with proper logging
-            try:
-                task = Task(
-                    description=f"Respond to the following message: {message}",
-                    expected_output="A helpful response to the user's query",
-                    agent=self.trading_agent,
-                    context=context_list
-                )
-                logger.debug("Successfully created Task object")
-            except Exception as task_error:
-                logger.error(f"Error creating Task object: {task_error}")
-                # Log detailed information about the context_list for debugging
-                for i, ctx_item in enumerate(context_list):
-                    logger.error(f"Context item {i}: description={ctx_item['description']}, expected_output type={type(ctx_item['expected_output']).__name__}")
-                raise
-            
-            # Log that we're about to process the message with the LLM
-            logger.info(f"Processing message with LLM: {message[:50]}...")
+            # Add a simplified form of conversation history if it exists
+            if "conversation_history" in context and context["conversation_history"]:
+                try:
+                    # Create a simplified version of the conversation history
+                    history = []
+                    for msg in context["conversation_history"][-6:]:  # Only use last 3 exchanges (6 messages)
+                        if hasattr(msg, "content"):
+                            role = "user" if isinstance(msg, HumanMessage) else "assistant"
+                            history.append(f"{role}: {msg.content[:100]}...")
+                    
+                    crew_inputs["conversation_history"] = "\n".join(history)
+                except Exception as e:
+                    logger.warning(f"Could not process conversation history: {e}")
             
             # Run the crew asynchronously
             loop = asyncio.get_event_loop()
             try:
                 logger.debug("About to execute Crew AI task")
-                result = await loop.run_in_executor(
-                    None,
-                    lambda: self.crew.kickoff(inputs=crew_inputs, tasks=[task])
+                
+                # Use a timeout to prevent hanging
+                # The key fix here is removing 'tasks' parameter from kickoff()
+                result = await asyncio.wait_for(
+                    loop.run_in_executor(
+                        None,
+                        lambda: self.crew.kickoff(inputs=crew_inputs)
+                    ),
+                    timeout=60  # 60 second timeout
                 )
                 logger.info("Successfully received response from Crew AI")
+            except asyncio.TimeoutError:
+                logger.error("Timeout while waiting for Crew AI response")
+                return "I'm sorry, but it's taking me too long to process your request. Could you try again with a simpler question?", None
             except Exception as e:
                 logger.error(f"Error running Crew AI task: {e}")
-                # Log more details about the exception
                 logger.error(f"Exception type: {type(e).__name__}")
                 logger.error(f"Exception args: {e.args}")
-                raise
+                logger.error(f"Traceback: {traceback.format_exc()}")
+                return fallback_response, None
             
-            # Extract the response from the task output
-            response = result[0].output if isinstance(result, list) else result.output
-            logger.info(f"Generated response: {response[:50]}...")
-            tool_used = None  # In a real implementation, you would track which tool was used
+            # Extract the response from the result
+            try:
+                # Different versions of CrewAI return result in different formats
+                # Try several approaches to extract the response
+                if isinstance(result, str):
+                    response = result
+                elif hasattr(result, 'output'):
+                    response = result.output
+                elif isinstance(result, list) and len(result) > 0:
+                    if hasattr(result[0], 'output'):
+                        response = result[0].output
+                    else:
+                        response = str(result[0])
+                else:
+                    response = str(result)
+                
+                # Ensure the response is a string
+                if not isinstance(response, str):
+                    response = str(response)
+                
+                logger.info(f"Generated response: {response[:50]}...")
+                tool_used = None  # In a real implementation, you would track which tool was used
+            except Exception as e:
+                logger.error(f"Error extracting response from result: {e}")
+                logger.error(f"Result type: {type(result).__name__}")
+                logger.error(f"Result: {str(result)[:100]}...")
+                return fallback_response, None
             
             # Update conversation history in the context
-            if "conversation_history" not in context:
-                context["conversation_history"] = []
-            
-            # Add this exchange to the history
-            context["conversation_history"].append(HumanMessage(content=message))
-            context["conversation_history"].append(AIMessage(content=response))
-            
-            # Trim history if it gets too long
-            if len(context["conversation_history"]) > 10:  # Keep last 10 exchanges
-                context["conversation_history"] = context["conversation_history"][-10:]
+            try:
+                if "conversation_history" not in context:
+                    context["conversation_history"] = []
+                
+                # Add this exchange to the history
+                context["conversation_history"].append(HumanMessage(content=message))
+                context["conversation_history"].append(AIMessage(content=response))
+                
+                # Trim history if it gets too long
+                if len(context["conversation_history"]) > 10:  # Keep last 10 exchanges
+                    context["conversation_history"] = context["conversation_history"][-10:]
+            except Exception as e:
+                logger.warning(f"Error updating conversation history: {e}")
+                # Continue anyway, this isn't critical
             
             return response, tool_used
             
@@ -217,28 +293,5 @@ class LLMEngine:
             logger.error(f"Exception type: {type(e).__name__}")
             logger.error(f"Exception args: {e.args}")
             # Include traceback for more detailed debugging
-            import traceback
             logger.error(f"Traceback: {traceback.format_exc()}")
-            return "I'm having trouble processing your request right now. Please try again later.", None
-
-# Example of how to create and register a custom tool:
-"""
-# 1. Define your tool class
-from langchain.tools import BaseTool
-
-class MarketDataTool(BaseTool):
-    name = "market_data"
-    description = "Get current market data for a specific symbol"
-    
-    def _run(self, symbol: str) -> str:
-        # Implementation to fetch market data
-        return f"Market data for {symbol}: Price $100, Change +2%"
-    
-    async def _arun(self, symbol: str) -> str:
-        # Async implementation
-        return self._run(symbol)
-
-# 2. Register the tool with the LLM engine
-llm_engine = LLMEngine()
-llm_engine.register_tool(MarketDataTool())
-"""
+            return fallback_response, None

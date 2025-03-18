@@ -700,3 +700,436 @@ TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
 TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
 
 2025-03-17 10:15:46,692 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-17 10:29:52,701 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-17 10:29:53,243 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-17 10:29:53,243 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-17 10:29:53,244 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-17 10:29:53,871 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-17 10:29:53,873 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:29:53,878 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:29:53,879 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-17 10:29:53,879 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-17 10:29:53,879 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-17 10:29:53,879 - discord.client - INFO - logging in using static token
+2025-03-17 10:29:54,527 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-17 10:29:54,878 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 415fe5230e77c0047fd8958060ca7881).
+2025-03-17 10:29:56,885 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-17 10:29:56,885 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-17 10:31:13,297 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:31:13,297 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:31:13,297 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.60) - Simple heuristic evaluation determined this message needs a response
+2025-03-17 10:31:13,297 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.6 reason='Simple heuristic evaluation determined this message needs a response'
+2025-03-17 10:31:13,450 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-17 10:31:13,451 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-17 10:31:13,451 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-17 10:31:13,451 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-17 10:31:13,451 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-17 10:31:13,451 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 4 items
+2025-03-17 10:31:13,451 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-17 10:31:13,452 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-17 10:31:13,452 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ai bot what are the best trades today...
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-17 10:31:13,453 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-17 10:31:13,454 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-17 10:31:13,464 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs, tasks=[task])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
+
+2025-03-17 10:31:13,465 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-17 10:32:28,899 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-17 10:32:29,456 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-17 10:32:29,457 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-17 10:32:29,457 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-17 10:32:30,091 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-17 10:32:30,094 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:32:30,098 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:32:30,099 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-17 10:32:30,099 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-17 10:32:30,099 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-17 10:32:30,099 - discord.client - INFO - logging in using static token
+2025-03-17 10:32:30,799 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-17 10:32:31,092 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 7194b81b64e74b72f376902957a7b4e4).
+2025-03-17 10:32:33,117 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-17 10:32:33,117 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-17 10:32:38,860 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:32:38,860 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:32:38,860 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.60) - Simple heuristic evaluation determined this message needs a response
+2025-03-17 10:32:38,860 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.6 reason='Simple heuristic evaluation determined this message needs a response'
+2025-03-17 10:32:38,972 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-17 10:32:38,973 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-17 10:32:38,973 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-17 10:32:38,973 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-17 10:32:38,973 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-17 10:32:38,973 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 4 items
+2025-03-17 10:32:38,973 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-17 10:32:38,974 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-17 10:32:38,974 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ai bot what are the best trades today...
+2025-03-17 10:32:38,974 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-17 10:32:38,990 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:32:38,990 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: No task outputs available to create crew output.
+2025-03-17 10:32:38,990 - TradeMaster.LLMEngine - ERROR - Exception type: ValueError
+2025-03-17 10:32:38,991 - TradeMaster.LLMEngine - ERROR - Exception args: ('No task outputs available to create crew output.',)
+2025-03-17 10:32:38,991 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: No task outputs available to create crew output.
+2025-03-17 10:32:38,991 - TradeMaster.LLMEngine - ERROR - Exception type: ValueError
+2025-03-17 10:32:38,991 - TradeMaster.LLMEngine - ERROR - Exception args: ('No task outputs available to create crew output.',)
+2025-03-17 10:32:39,002 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs)  # Remove the tasks parameter
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 576, in kickoff
+    result = self._run_sequential_process()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 683, in _run_sequential_process
+    return self._execute_tasks(self.tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 793, in _execute_tasks
+    return self._create_crew_output(task_outputs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 930, in _create_crew_output
+    raise ValueError("No task outputs available to create crew output.")
+ValueError: No task outputs available to create crew output.
+
+2025-03-17 10:32:39,004 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-17 10:32:59,224 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:32:59,224 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:32:59,224 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:32:59,225 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-17 10:33:02,914 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:33:02,915 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:33:02,915 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:33:02,915 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-17 10:34:07,656 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:34:07,657 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:34:07,657 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.60) - Simple heuristic evaluation determined this message needs a response
+2025-03-17 10:34:07,657 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.6 reason='Simple heuristic evaluation determined this message needs a response'
+2025-03-17 10:34:07,809 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-17 10:34:07,809 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen', 'last_interaction_time', 'last_message']
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen', 'last_interaction_time', 'last_message']
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Added context item: last_seen (type: str)
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Added context item: last_interaction_time (type: str)
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Added context item: last_message (type: str)
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Created crew_inputs with 6 items
+2025-03-17 10:34:07,809 - TradeMaster.LLMEngine - DEBUG - Created context_list with 3 initial items
+2025-03-17 10:34:07,810 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-17 10:34:07,811 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ?...
+2025-03-17 10:34:07,811 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-17 10:34:07,819 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: No task outputs available to create crew output.
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Exception type: ValueError
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Exception args: ('No task outputs available to create crew output.',)
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: No task outputs available to create crew output.
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Exception type: ValueError
+2025-03-17 10:34:07,820 - TradeMaster.LLMEngine - ERROR - Exception args: ('No task outputs available to create crew output.',)
+2025-03-17 10:34:07,821 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 184, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 186, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs)  # Remove the tasks parameter
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 576, in kickoff
+    result = self._run_sequential_process()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 683, in _run_sequential_process
+    return self._execute_tasks(self.tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 793, in _execute_tasks
+    return self._create_crew_output(task_outputs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 930, in _create_crew_output
+    raise ValueError("No task outputs available to create crew output.")
+ValueError: No task outputs available to create crew output.
+
+2025-03-17 10:34:07,823 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-17 10:35:22,442 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:35:22,442 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:35:22,443 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:35:22,443 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-17 10:35:44,356 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:35:44,356 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:35:44,357 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:35:44,357 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-17 10:35:57,579 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:35:57,580 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:35:57,580 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:35:57,580 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-17 10:36:12,851 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-17 10:36:12,852 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-17 10:36:12,852 - TradeMaster.Client - INFO - Gatekeeper verdict: False (0.60) - Simple heuristic evaluation determined this message does not need a response
+2025-03-17 10:36:12,852 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=False confidence=0.6 reason='Simple heuristic evaluation determined this message does not need a response'
+2025-03-18 11:20:32,521 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-18 11:20:33,067 - TradeMaster.Gatekeeper - INFO - Ollama model 'gemma3:1b' initialized successfully
+2025-03-18 11:20:33,067 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-18 11:20:33,067 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-18 11:20:33,722 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-18 11:20:33,722 - TradeMaster.LLMEngine - INFO - Built agent workflow with LangChain
+2025-03-18 11:20:33,722 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-18 11:20:33,722 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-18 11:20:33,722 - discord.client - INFO - logging in using static token
+2025-03-18 11:20:34,241 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-18 11:20:34,455 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: f1d41d432292ee1094c641882794e8fa).
+2025-03-18 11:20:36,461 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-18 11:20:36,462 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-18 11:20:56,997 - TradeMaster.Gatekeeper - ERROR - Error using Ollama for message evaluation: [WinError 10061] No connection could be made because the target machine actively refused it
+2025-03-18 11:20:56,997 - TradeMaster.Gatekeeper - INFO - Falling back to simple heuristic evaluation
+2025-03-18 11:20:56,997 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.60) - Simple heuristic evaluation determined this message needs a response
+2025-03-18 11:20:56,998 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.6 reason='Simple heuristic evaluation determined this message needs a response'
+2025-03-18 11:20:57,192 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-18 11:20:57,192 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-18 11:20:57,192 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-18 11:20:57,192 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-18 11:20:57,192 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ai agent what are the best tools for trading...
+2025-03-18 11:20:57,193 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: "Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT "
+2025-03-18 11:20:57,193 - TradeMaster.LLMEngine - ERROR - Exception type: KeyError
+2025-03-18 11:20:57,193 - TradeMaster.LLMEngine - ERROR - Exception args: ("Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT ",)
+2025-03-18 11:20:57,239 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 173, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 175, in <lambda>
+    lambda: self.chain.invoke({"input": message, "chat_history": self.memory.chat_memory.messages})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\base.py", line 3027, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 210, in invoke
+    return self._call_with_config(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\base.py", line 1927, in _call_with_config
+    context.run(
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\config.py", line 396, in call_func_with_variable_args
+    return func(input, **kwargs)  # type: ignore[call-arg]
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 184, in _format_prompt_with_error_handling
+    _inner_input = self._validate_input(inner_input)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 178, in _validate_input
+    raise KeyError(
+KeyError: "Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT "
+
+2025-03-18 11:20:57,241 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-18 11:35:25,043 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-18 11:35:29,147 - TradeMaster.Gatekeeper - WARNING - Failed to connect to Ollama: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000002C35D357260>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2025-03-18 11:35:29,148 - TradeMaster.Gatekeeper - WARNING - Ollama not available at http://localhost:11434. Using fallback heuristics.
+2025-03-18 11:35:29,148 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-18 11:35:29,148 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-18 11:35:29,811 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM
+2025-03-18 11:35:29,811 - TradeMaster.LLMEngine - INFO - Built agent workflow with LangChain
+2025-03-18 11:35:29,811 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-18 11:35:29,811 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-18 11:35:29,812 - discord.client - INFO - logging in using static token
+2025-03-18 11:35:30,418 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-18 11:35:30,892 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 53cae9daf3970f037e7b8a6a7f73ec02).
+2025-03-18 11:35:32,927 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-18 11:35:32,927 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-18 11:35:36,038 - TradeMaster.Gatekeeper - INFO - Using heuristic evaluation (Ollama not initialized)
+2025-03-18 11:35:36,038 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.65) - Message contains finance/trading related keywords
+2025-03-18 11:35:36,039 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.65 reason='Message contains finance/trading related keywords'
+2025-03-18 11:35:36,137 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-18 11:35:36,137 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-18 11:35:36,137 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-18 11:35:36,137 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-18 11:35:36,137 - TradeMaster.LLMEngine - INFO - Processing message with LLM: ai agent what are the best tools for trading...
+2025-03-18 11:35:36,143 - TradeMaster.LLMEngine - ERROR - Error processing message with LLM: "Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT "
+2025-03-18 11:35:36,144 - TradeMaster.LLMEngine - ERROR - Exception type: KeyError
+2025-03-18 11:35:36,144 - TradeMaster.LLMEngine - ERROR - Exception args: ("Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT ",)
+2025-03-18 11:35:36,147 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 173, in process_message
+    result = await loop.run_in_executor(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 175, in <lambda>
+    lambda: self.chain.invoke({"input": message, "chat_history": self.memory.chat_memory.messages})
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\base.py", line 3027, in invoke
+    input = context.run(step.invoke, input, config, **kwargs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 210, in invoke
+    return self._call_with_config(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\base.py", line 1927, in _call_with_config
+    context.run(
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\runnables\config.py", line 396, in call_func_with_variable_args
+    return func(input, **kwargs)  # type: ignore[call-arg]
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 184, in _format_prompt_with_error_handling
+    _inner_input = self._validate_input(inner_input)
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\langchain_core\prompts\base.py", line 178, in _validate_input
+    raise KeyError(
+KeyError: "Input to ChatPromptTemplate is missing variables {'agent_scratchpad'}.  Expected: ['agent_scratchpad', 'chat_history', 'input'] Received: ['input', 'chat_history']\nNote: if you intended {agent_scratchpad} to be part of the string and not a variable, please escape it with double curly braces like: '{{agent_scratchpad}}'.\nFor troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/INVALID_PROMPT_INPUT "
+
+2025-03-18 11:35:36,148 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-18 11:36:17,108 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-18 11:36:21,206 - TradeMaster.Gatekeeper - WARNING - Failed to connect to Ollama: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000016C795C2240>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2025-03-18 11:36:21,206 - TradeMaster.Gatekeeper - WARNING - Ollama not available at http://localhost:11434. Using fallback heuristics.
+2025-03-18 11:36:21,206 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-18 11:36:21,207 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-18 11:36:21,861 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM with model llama3-70b-8192
+2025-03-18 11:36:21,863 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:36:21,875 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:36:21,875 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-18 11:36:21,875 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-18 11:36:21,875 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-18 11:36:21,875 - discord.client - INFO - logging in using static token
+2025-03-18 11:36:22,394 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-18 11:36:22,643 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 44686940a8896af36479e55c4d768814).
+2025-03-18 11:36:24,658 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-18 11:36:24,659 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-18 11:36:35,779 - TradeMaster.Gatekeeper - INFO - Using heuristic evaluation (Ollama not initialized)
+2025-03-18 11:36:35,780 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.65) - Message contains finance/trading related keywords
+2025-03-18 11:36:35,780 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.65 reason='Message contains finance/trading related keywords'
+2025-03-18 11:36:35,912 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-18 11:36:35,912 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-18 11:36:35,912 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-18 11:36:35,912 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-18 11:36:35,912 - TradeMaster.LLMEngine - DEBUG - Created context_list with 2 items
+2025-03-18 11:36:35,914 - TradeMaster.LLMEngine - DEBUG - Successfully created Task object
+2025-03-18 11:36:35,914 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-18 11:36:35,914 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: Crew.kickoff() got an unexpected keyword argument 'tasks'
+2025-03-18 11:36:35,914 - TradeMaster.LLMEngine - ERROR - Exception type: TypeError
+2025-03-18 11:36:35,914 - TradeMaster.LLMEngine - ERROR - Exception args: ("Crew.kickoff() got an unexpected keyword argument 'tasks'",)
+2025-03-18 11:36:35,928 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 246, in process_message
+    result = await asyncio.wait_for(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 249, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs, tasks=[task])
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+TypeError: Crew.kickoff() got an unexpected keyword argument 'tasks'
+
+2025-03-18 11:36:35,929 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
+2025-03-18 11:39:03,177 - discord.client - WARNING - PyNaCl is not installed, voice will NOT be supported
+2025-03-18 11:39:07,283 - TradeMaster.Gatekeeper - WARNING - Failed to connect to Ollama: HTTPConnectionPool(host='localhost', port=11434): Max retries exceeded with url: /api/tags (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x0000028A3F0EE0F0>: Failed to establish a new connection: [WinError 10061] No connection could be made because the target machine actively refused it'))
+2025-03-18 11:39:07,284 - TradeMaster.Gatekeeper - WARNING - Ollama not available at http://localhost:11434. Using fallback heuristics.
+2025-03-18 11:39:07,284 - TradeMaster.Gatekeeper - INFO - Gatekeeper initialized
+2025-03-18 11:39:07,284 - TradeMaster.Client - INFO - Initialized gatekeeper for message filtering
+2025-03-18 11:39:07,951 - TradeMaster.LLMEngine - INFO - Initialized Groq LLM with model llama3-70b-8192
+2025-03-18 11:39:07,953 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:39:07,958 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:39:07,958 - TradeMaster.LLMEngine - INFO - Built agent workflow with Crew AI
+2025-03-18 11:39:07,958 - TradeMaster.Client - INFO - Initialized main LLM engine
+2025-03-18 11:39:07,958 - TradeMaster - INFO - Attempting to connect to Discord...
+2025-03-18 11:39:07,958 - discord.client - INFO - logging in using static token
+2025-03-18 11:39:08,606 - TradeMaster.Client - INFO - Slash commands synchronized
+2025-03-18 11:39:08,862 - discord.gateway - INFO - Shard ID None has connected to Gateway (Session ID: 56a00585e43edee3843b958a55735bf7).
+2025-03-18 11:39:10,890 - TradeMaster.Client - INFO - Trading Talk#0225 has connected to Discord!
+2025-03-18 11:39:10,890 - TradeMaster.Client - INFO - Bot is connected to 1 guilds
+2025-03-18 11:39:19,521 - TradeMaster.Gatekeeper - INFO - Using heuristic evaluation (Ollama not initialized)
+2025-03-18 11:39:19,522 - TradeMaster.Client - INFO - Gatekeeper verdict: True (0.65) - Message contains finance/trading related keywords
+2025-03-18 11:39:19,522 - TradeMaster.Client - DEBUG - Full gatekeeper verdict details: should_respond=True confidence=0.65 reason='Message contains finance/trading related keywords'
+2025-03-18 11:39:19,650 - TradeMaster.Client - DEBUG - Passing user_id to LLM engine: 810428033500184606 (type: int)
+2025-03-18 11:39:19,650 - TradeMaster.Client - DEBUG - Context being passed to LLM engine: ['last_seen']
+2025-03-18 11:39:19,650 - TradeMaster.LLMEngine - DEBUG - Processing message for user_id: 810428033500184606 (type: int)
+2025-03-18 11:39:19,650 - TradeMaster.LLMEngine - DEBUG - Context keys: ['last_seen']
+2025-03-18 11:39:19,650 - TradeMaster.LLMEngine - DEBUG - About to execute Crew AI task
+2025-03-18 11:39:19,672 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:39:19,674 - root - ERROR - Failed to get supported params: argument of type 'NoneType' is not iterable
+2025-03-18 11:39:19,725 - root - ERROR - LiteLLM call failed: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=llama3-70b-8192
+ Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+2025-03-18 11:39:19,727 - TradeMaster.LLMEngine - ERROR - Error running Crew AI task: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=llama3-70b-8192
+ Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+2025-03-18 11:39:19,727 - TradeMaster.LLMEngine - ERROR - Exception type: BadRequestError
+2025-03-18 11:39:19,727 - TradeMaster.LLMEngine - ERROR - Exception args: ("litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=llama3-70b-8192\n Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers",)
+2025-03-18 11:39:19,777 - TradeMaster.LLMEngine - ERROR - Traceback: Traceback (most recent call last):
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 227, in process_message
+    result = await asyncio.wait_for(
+             ^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\asyncio\tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\Programs\Python\Python312\Lib\concurrent\futures\thread.py", line 58, in run
+    result = self.fn(*self.args, **self.kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\Desktop\trade_bot\TradeMaster2.0\core\llm_engine.py", line 230, in <lambda>
+    lambda: self.crew.kickoff(inputs=crew_inputs)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 576, in kickoff
+    result = self._run_sequential_process()
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 683, in _run_sequential_process
+    return self._execute_tasks(self.tasks)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\crew.py", line 781, in _execute_tasks
+    task_output = task.execute_sync(
+                  ^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\task.py", line 302, in execute_sync
+    return self._execute_core(agent, context, tools)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\task.py", line 366, in _execute_core
+    result = agent.execute_task(
+             ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agent.py", line 254, in execute_task
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agent.py", line 243, in execute_task
+    result = self.agent_executor.invoke(
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 112, in invoke
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 102, in invoke
+    formatted_answer = self._invoke_loop()
+                       ^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 160, in _invoke_loop
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 140, in _invoke_loop
+    answer = self._get_llm_response()
+             ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 210, in _get_llm_response
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\agents\crew_agent_executor.py", line 201, in _get_llm_response
+    answer = self.llm.call(
+             ^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\crewai\llm.py", line 291, in call
+    response = litellm.completion(**params)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\utils.py", line 1154, in wrapper
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\utils.py", line 1032, in wrapper
+    result = original_function(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\main.py", line 3068, in completion
+    raise exception_type(
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\main.py", line 979, in completion
+    model, custom_llm_provider, dynamic_api_key, api_base = get_llm_provider(
+                                                            ^^^^^^^^^^^^^^^^^
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\litellm_core_utils\get_llm_provider_logic.py", line 356, in get_llm_provider
+    raise e
+  File "C:\Users\Sturgis\AppData\Local\pypoetry\Cache\virtualenvs\trademaster2-0-QYypnrSB-py3.12\Lib\site-packages\litellm\litellm_core_utils\get_llm_provider_logic.py", line 333, in get_llm_provider
+    raise litellm.exceptions.BadRequestError(  # type: ignore
+litellm.exceptions.BadRequestError: litellm.BadRequestError: LLM Provider NOT provided. Pass in the LLM provider you are trying to call. You passed model=llama3-70b-8192
+ Pass model as E.g. For 'Huggingface' inference endpoints pass in `completion(model='huggingface/starcoder',..)` Learn more: https://docs.litellm.ai/docs/providers
+
+2025-03-18 11:39:19,782 - TradeMaster.Client - DEBUG - Received response from LLM engine: I'm having trouble processing your request right n...
