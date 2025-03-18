@@ -20,7 +20,6 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 # Now import from core directly
 from core.llm import LLMEngine
 from core.context import ContextManager
-from core.gatekeeper import Gatekeeper
 
 # Set up logger for this module
 logger = logging.getLogger("TradeMaster.Client")
@@ -44,11 +43,6 @@ class TradeMasterClient(commands.Bot):
         # Initialize components
         self.context_manager = ContextManager()
         self.llm_engine = LLMEngine()
-        
-        # Initialize the Ollama-based gatekeeper
-        ollama_model = os.getenv("OLLAMA_MODEL", "gemma3:1b")
-        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-        self.gatekeeper = Gatekeeper(model_name=ollama_model, ollama_base_url=ollama_url)
         
         logger.info("TradeMaster client initialized")
     
@@ -79,15 +73,24 @@ class TradeMasterClient(commands.Bot):
     
     async def on_message(self, message):
         """Handle incoming messages."""
+        # Log all incoming messages for debugging
+        logger.debug(f"Received message: {message.content[:50]}... from {message.author.name} in {message.channel.name}")
+        
         # Ignore own messages
         if message.author == self.user:
+            logger.debug("Ignoring own message")
             return
         
         # Process commands with the command prefix
         await self.process_commands(message)
         
         # Ignore messages with a prefix or from bots
-        if message.content.startswith(self.command_prefix) or message.author.bot:
+        if message.content.startswith(self.command_prefix):
+            logger.debug(f"Ignoring message with prefix: {self.command_prefix}")
+            return
+            
+        if message.author.bot:
+            logger.debug("Ignoring message from another bot")
             return
         
         # Update user context
@@ -100,35 +103,24 @@ class TradeMasterClient(commands.Bot):
         user_context['channel_id'] = channel_id
         
         try:
-            # Check if the bot is mentioned
+            # Check if the bot is mentioned (for logging purposes only)
             bot_mentioned = self.user.mentioned_in(message)
             
-            # Use the Ollama-based gatekeeper to determine if we should respond
-            # Note: Removed the user_mentioned parameter to match the new Gatekeeper
-            verdict = await self.gatekeeper.should_respond(
-                message.content, 
-                user_id, 
-                bot_mentioned=bot_mentioned,
-                context=user_context
-            )
-            
-            if verdict.should_respond:
-                async with message.channel.typing():
-                    # Generate response using LLM engine
-                    response = await self.llm_engine.generate_response(
-                        message.content,
-                        user_id,
-                        context=user_context
-                    )
-                    
-                    # Update context with bot's response
-                    self.context_manager.add_bot_response(user_id, response)
-                    
-                    # Reply to the message
-                    await message.reply(response)
-                    logger.info(f"Responded to message from {message.author.name}: {message.content[:50]}...")
-            else:
-                logger.debug(f"Ignoring message from {message.author.name}: {message.content[:50]}...")
+            # Direct all messages to the LLM engine without gatekeeper filtering
+            async with message.channel.typing():
+                # Generate response using LLM engine
+                response = await self.llm_engine.generate_response(
+                    message.content,
+                    user_id,
+                    context=user_context
+                )
+                
+                # Update context with bot's response
+                self.context_manager.add_bot_response(user_id, response)
+                
+                # Reply to the message
+                await message.reply(response)
+                logger.info(f"Responded to message from {message.author.name}: {message.content[:50]}...")
         
         except Exception as e:
             logger.error(f"Error processing message: {e}")

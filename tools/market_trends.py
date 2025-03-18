@@ -7,13 +7,11 @@ stock and cryptocurrency markets.
 
 import logging
 import os
-import aiohttp
-import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import asyncio
 
 from .base_tool import BaseTool
+from utils.api_utils import make_api_request, get_coingecko_url, get_alphavantage_params, format_error_response
 
 logger = logging.getLogger("TradeMaster.Tools.MarketTrends")
 
@@ -85,62 +83,43 @@ class MarketTrendsTool(BaseTool):
         
         # For trending coins
         if category == "trending":
-            # Set up API URL
-            if self.coingecko_api_key:
-                url = "https://pro-api.coingecko.com/api/v3/search/trending"
-                headers = {"x-cg-pro-api-key": self.coingecko_api_key}
-            else:
-                # Fallback to free API (with rate limits)
-                url = "https://api.coingecko.com/api/v3/search/trending"
-                headers = {}
+            # Get appropriate URL and headers
+            url, headers = get_coingecko_url("search/trending")
             
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url, headers=headers) as response:
-                        if response.status != 200:
-                            logger.error(f"Error fetching crypto trends: {response.status}")
-                            return {"error": "Could not fetch trending cryptos", "status": response.status}
-                        
-                        data = await response.json()
-                        
-                        # Extract trending coins
-                        trending_coins = data.get("coins", [])
-                        
-                        # Format results
-                        results = []
-                        for i, coin_data in enumerate(trending_coins[:limit]):
-                            coin = coin_data.get("item", {})
-                            results.append({
-                                "rank": i + 1,
-                                "symbol": coin.get("symbol", "").upper(),
-                                "name": coin.get("name", "Unknown"),
-                                "market_cap_rank": coin.get("market_cap_rank"),
-                                "price_btc": coin.get("price_btc"),
-                                "id": coin.get("id")
-                            })
-                        
-                        return {
-                            "category": "trending",
-                            "market_type": "crypto",
-                            "results": results,
-                            "time": datetime.now().isoformat(),
-                            "source": "CoinGecko"
-                        }
+            # Make API request
+            success, data = await make_api_request(url, headers)
             
-            except Exception as e:
-                logger.error(f"Error fetching crypto trends: {e}")
-                return {"error": f"Failed to get trending cryptos: {str(e)}"}
+            if not success:
+                return data  # Error response is already formatted
+            
+            # Extract trending coins
+            trending_coins = data.get("coins", [])
+            
+            # Format results
+            results = []
+            for i, coin_data in enumerate(trending_coins[:limit]):
+                coin = coin_data.get("item", {})
+                results.append({
+                    "rank": i + 1,
+                    "symbol": coin.get("symbol", "").upper(),
+                    "name": coin.get("name", "Unknown"),
+                    "market_cap_rank": coin.get("market_cap_rank"),
+                    "price_btc": coin.get("price_btc"),
+                    "id": coin.get("id")
+                })
+            
+            return {
+                "category": "trending",
+                "market_type": "crypto",
+                "results": results,
+                "time": datetime.now().isoformat(),
+                "source": "CoinGecko"
+            }
         
         # For gainers and losers
         else:
-            # Set up API URL for market data
-            if self.coingecko_api_key:
-                url = "https://pro-api.coingecko.com/api/v3/coins/markets"
-                headers = {"x-cg-pro-api-key": self.coingecko_api_key}
-            else:
-                # Fallback to free API (with rate limits)
-                url = "https://api.coingecko.com/api/v3/coins/markets"
-                headers = {}
+            # Get appropriate URL and headers
+            url, headers = get_coingecko_url("coins/markets")
             
             params = {
                 "vs_currency": "usd",
@@ -151,46 +130,39 @@ class MarketTrendsTool(BaseTool):
                 "price_change_percentage": "24h"
             }
             
-            try:
-                async with aiohttp.ClientSession() as session:
-                    async with session.get(url, params=params, headers=headers) as response:
-                        if response.status != 200:
-                            logger.error(f"Error fetching crypto market data: {response.status}")
-                            return {"error": "Could not fetch crypto market data", "status": response.status}
-                        
-                        data = await response.json()
-                        
-                        # Sort by price change percentage
-                        if category == "gainers":
-                            sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0), reverse=True)
-                        else:  # losers
-                            sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0))
-                        
-                        # Format results
-                        results = []
-                        for i, coin in enumerate(sorted_data[:limit]):
-                            results.append({
-                                "rank": i + 1,
-                                "symbol": coin.get("symbol", "").upper(),
-                                "name": coin.get("name", "Unknown"),
-                                "price_usd": coin.get("current_price"),
-                                "price_change_24h": coin.get("price_change_24h"),
-                                "price_change_percentage_24h": coin.get("price_change_percentage_24h"),
-                                "market_cap": coin.get("market_cap"),
-                                "volume_24h": coin.get("total_volume")
-                            })
-                        
-                        return {
-                            "category": category,
-                            "market_type": "crypto",
-                            "results": results,
-                            "time": datetime.now().isoformat(),
-                            "source": "CoinGecko"
-                        }
+            # Make API request
+            success, data = await make_api_request(url, headers, params)
             
-            except Exception as e:
-                logger.error(f"Error fetching crypto market data: {e}")
-                return {"error": f"Failed to get {category} cryptos: {str(e)}"}
+            if not success:
+                return data  # Error response is already formatted
+            
+            # Sort by price change percentage
+            if category == "gainers":
+                sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0), reverse=True)
+            else:  # losers
+                sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0))
+            
+            # Format results
+            results = []
+            for i, coin in enumerate(sorted_data[:limit]):
+                results.append({
+                    "rank": i + 1,
+                    "symbol": coin.get("symbol", "").upper(),
+                    "name": coin.get("name", "Unknown"),
+                    "price_usd": coin.get("current_price"),
+                    "price_change_24h": coin.get("price_change_24h"),
+                    "price_change_percentage_24h": coin.get("price_change_percentage_24h"),
+                    "market_cap": coin.get("market_cap"),
+                    "volume_24h": coin.get("total_volume")
+                })
+            
+            return {
+                "category": category,
+                "market_type": "crypto",
+                "results": results,
+                "time": datetime.now().isoformat(),
+                "source": "CoinGecko"
+            }
     
     async def _get_stock_trends(self, category: str, limit: int) -> Dict[str, Any]:
         """
@@ -205,7 +177,7 @@ class MarketTrendsTool(BaseTool):
         """
         if not self.alphavantage_api_key:
             logger.error("Alpha Vantage API key not found")
-            return {"error": "Alpha Vantage API key not configured"}
+            return format_error_response("market_trends", "Alpha Vantage API key not configured")
         
         # Ensure limit is reasonable
         limit = max(1, min(25, limit))
@@ -213,58 +185,54 @@ class MarketTrendsTool(BaseTool):
         # Map category to Alpha Vantage function
         function = "TOP_GAINERS_LOSERS"
         
-        url = f"https://www.alphavantage.co/query?function={function}&apikey={self.alphavantage_api_key}"
+        # Make API request
+        url = "https://www.alphavantage.co/query"
+        params = {"function": function, "apikey": self.alphavantage_api_key}
+        success, data = await make_api_request(url, params=params)
         
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        logger.error(f"Error fetching stock trends: {response.status}")
-                        return {"error": f"Could not fetch stock trends", "status": response.status}
-                    
-                    data = await response.json()
-                    
-                    # Check for API errors or empty responses
-                    if "Error Message" in data:
-                        return {"error": data["Error Message"]}
-                    
-                    # Get the appropriate category from response
-                    if category == "gainers":
-                        category_data = data.get("top_gainers", [])
-                    elif category == "losers":
-                        category_data = data.get("top_losers", [])
-                    else:  # trending - Alpha Vantage doesn't have a direct trending endpoint, so use most active
-                        category_data = data.get("most_actively_traded", [])
-                    
-                    # Format results
-                    results = []
-                    for i, stock in enumerate(category_data[:limit]):
-                        change_percent = stock.get("change_percentage", "0%").replace("%", "")
-                        try:
-                            change_percent_float = float(change_percent)
-                        except:
-                            change_percent_float = 0.0
-                            
-                        results.append({
-                            "rank": i + 1,
-                            "symbol": stock.get("ticker", ""),
-                            "price_usd": float(stock.get("price", 0)),
-                            "change_amount": float(stock.get("change_amount", 0)),
-                            "change_percentage": change_percent_float,
-                            "volume": int(stock.get("volume", 0))
-                        })
-                    
-                    return {
-                        "category": category,
-                        "market_type": "stock",
-                        "results": results,
-                        "time": datetime.now().isoformat(),
-                        "source": "Alpha Vantage"
-                    }
+        if not success:
+            return data  # Error response is already formatted
         
-        except Exception as e:
-            logger.error(f"Error fetching stock trends: {e}")
-            return {"error": f"Failed to get {category} stocks: {str(e)}"}
+        # Check for API errors or empty responses
+        if "Error Message" in data:
+            return format_error_response("market_trends", data["Error Message"])
+        
+        # Extract the appropriate category
+        if category == "gainers":
+            category_data = data.get("top_gainers", [])
+        elif category == "losers":
+            category_data = data.get("top_losers", [])
+        else:  # trending - use most active
+            category_data = data.get("most_actively_traded", [])
+        
+        if not category_data:
+            return format_error_response("market_trends", f"No {category} data available")
+        
+        # Format results
+        results = []
+        for i, stock in enumerate(category_data[:limit]):
+            change_percent = stock.get("change_percentage", "0%").replace("%", "")
+            try:
+                change_percent_float = float(change_percent)
+            except:
+                change_percent_float = 0.0
+                
+            results.append({
+                "rank": i + 1,
+                "symbol": stock.get("ticker", ""),
+                "price_usd": float(stock.get("price", 0)),
+                "change_amount": float(stock.get("change_amount", 0)),
+                "change_percentage": change_percent_float,
+                "volume": int(stock.get("volume", 0))
+            })
+        
+        return {
+            "category": category,
+            "market_type": "stock",
+            "results": results,
+            "time": datetime.now().isoformat(),
+            "source": "Alpha Vantage"
+        }
     
     async def execute(self, **kwargs) -> Dict[str, Any]:
         """

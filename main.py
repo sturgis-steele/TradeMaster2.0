@@ -11,14 +11,20 @@ sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 import asyncio
 import logging
 import os
+import discord
 from dotenv import load_dotenv
 
 # Import bot client
 from bot.client import TradeMasterClient
 from utils.logging import setup_logging
 
-# Set up logging
+# Set up logging with more detailed configuration
 logger = setup_logging()
+
+# Log Python version and environment info
+logger.info(f"Python version: {sys.version}")
+logger.info(f"Discord.py version: {discord.__version__ if 'discord' in sys.modules else 'Not loaded yet'}")
+logger.info(f"Running from: {os.path.abspath('.')}")
 
 # Load environment variables
 config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", ".env")

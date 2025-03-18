@@ -7,13 +7,11 @@ It uses both CoinGecko for crypto prices and Alpha Vantage for stock prices.
 
 import logging
 import os
-import aiohttp
-import json
 from typing import Dict, Any, List, Optional
 from datetime import datetime
-import asyncio
 
 from .base_tool import BaseTool
+from utils.api_utils import make_api_request, get_coingecko_url, get_alphavantage_params, format_error_response
 
 logger = logging.getLogger("TradeMaster.Tools.PriceChecker")
 
@@ -139,44 +137,31 @@ class PriceCheckerTool(BaseTool):
         # Convert symbol to CoinGecko ID if known
         coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
         
-        # Set up API URL
-        if self.coingecko_api_key:
-            url = f"https://pro-api.coingecko.com/api/v3/coins/{coin_id}"
-            headers = {"x-cg-pro-api-key": self.coingecko_api_key}
-        else:
-            # Fallback to free API (with rate limits)
-            url = f"https://api.coingecko.com/api/v3/coins/{coin_id}"
-            headers = {}
+        # Get appropriate URL and headers
+        url, headers = get_coingecko_url(f"coins/{coin_id}")
         
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url, headers=headers) as response:
-                    if response.status != 200:
-                        logger.error(f"Error fetching crypto price: {response.status}")
-                        return {"error": f"Could not fetch price for {symbol}", "status": response.status}
-                    
-                    data = await response.json()
-                    
-                    # Extract relevant information
-                    price_usd = data.get("market_data", {}).get("current_price", {}).get("usd")
-                    price_change_24h = data.get("market_data", {}).get("price_change_percentage_24h")
-                    market_cap = data.get("market_data", {}).get("market_cap", {}).get("usd")
-                    volume_24h = data.get("market_data", {}).get("total_volume", {}).get("usd")
-                    
-                    return {
-                        "symbol": symbol_upper,
-                        "name": data.get("name", "Unknown"),
-                        "price_usd": price_usd,
-                        "price_change_24h": price_change_24h,
-                        "market_cap": market_cap,
-                        "volume_24h": volume_24h,
-                        "time": datetime.now().isoformat(),
-                        "source": "CoinGecko"
-                    }
+        # Make API request
+        success, data = await make_api_request(url, headers)
         
-        except Exception as e:
-            logger.error(f"Error fetching crypto price: {e}")
-            return {"error": f"Failed to get price for {symbol}: {str(e)}"}
+        if not success:
+            return data  # Error response is already formatted
+        
+        # Extract relevant information
+        price_usd = data.get("market_data", {}).get("current_price", {}).get("usd")
+        price_change_24h = data.get("market_data", {}).get("price_change_percentage_24h")
+        market_cap = data.get("market_data", {}).get("market_cap", {}).get("usd")
+        volume_24h = data.get("market_data", {}).get("total_volume", {}).get("usd")
+        
+        return {
+            "symbol": symbol_upper,
+            "name": data.get("name", "Unknown"),
+            "price_usd": price_usd,
+            "price_change_24h": price_change_24h,
+            "market_cap": market_cap,
+            "volume_24h": volume_24h,
+            "time": datetime.now().isoformat(),
+            "source": "CoinGecko"
+        }
     
     async def _get_stock_price(self, symbol: str) -> Dict[str, Any]:
         """
@@ -190,47 +175,42 @@ class PriceCheckerTool(BaseTool):
         """
         if not self.alphavantage_api_key:
             logger.error("Alpha Vantage API key not found")
-            return {"error": "Alpha Vantage API key not configured"}
+            return format_error_response(symbol, "Alpha Vantage API key not configured")
         
         symbol_upper = symbol.upper()
-        url = f"https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol={symbol_upper}&apikey={self.alphavantage_api_key}"
         
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as response:
-                    if response.status != 200:
-                        logger.error(f"Error fetching stock price: {response.status}")
-                        return {"error": f"Could not fetch price for {symbol}", "status": response.status}
-                    
-                    data = await response.json()
-                    
-                    # Check for API errors or empty responses
-                    if "Error Message" in data:
-                        return {"error": data["Error Message"]}
-                    
-                    if "Global Quote" not in data or not data["Global Quote"]:
-                        return {"error": f"No data found for stock symbol {symbol}"}
-                    
-                    quote = data["Global Quote"]
-                    
-                    # Extract relevant information
-                    price = float(quote.get("05. price", 0))
-                    change_percent = quote.get("10. change percent", "0%").replace("%", "")
-                    
-                    return {
-                        "symbol": symbol_upper,
-                        "price_usd": price,
-                        "price_change": float(quote.get("09. change", 0)),
-                        "price_change_percent": float(change_percent),
-                        "volume": int(float(quote.get("06. volume", 0))),
-                        "latest_trading_day": quote.get("07. latest trading day", ""),
-                        "time": datetime.now().isoformat(),
-                        "source": "Alpha Vantage"
-                    }
+        # Get parameters for Alpha Vantage API
+        params = get_alphavantage_params("GLOBAL_QUOTE", symbol_upper)
         
-        except Exception as e:
-            logger.error(f"Error fetching stock price: {e}")
-            return {"error": f"Failed to get price for {symbol}: {str(e)}"}
+        # Make API request
+        success, data = await make_api_request("https://www.alphavantage.co/query", params=params)
+        
+        if not success:
+            return data  # Error response is already formatted
+        
+        # Check for API errors or empty responses
+        if "Error Message" in data:
+            return format_error_response(symbol, data["Error Message"])
+        
+        if "Global Quote" not in data or not data["Global Quote"]:
+            return format_error_response(symbol, f"No data found for stock symbol {symbol}")
+        
+        quote = data["Global Quote"]
+        
+        # Extract relevant information
+        price = float(quote.get("05. price", 0))
+        change_percent = quote.get("10. change percent", "0%").replace("%", "")
+        
+        return {
+            "symbol": symbol_upper,
+            "price_usd": price,
+            "price_change": float(quote.get("09. change", 0)),
+            "price_change_percent": float(change_percent),
+            "volume": int(float(quote.get("06. volume", 0))),
+            "latest_trading_day": quote.get("07. latest trading day", ""),
+            "time": datetime.now().isoformat(),
+            "source": "Alpha Vantage"
+        }
     
     async def execute(self, **kwargs) -> Dict[str, Any]:
         """

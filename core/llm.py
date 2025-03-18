@@ -1,161 +1,180 @@
-"""
-LLM Engine for TradeMaster 2.0
-Simple implementation for Phase 1 with enhanced responses.
+"""LLM Engine for TradeMaster 2.0
+
+This module implements the core language model engine for the TradeMaster trading assistant.
+It provides integration with Groq LLM API to generate responses to user queries about
+trading, markets, and financial concepts.
 """
 
 import logging
 import os
+import json
+import aiohttp
 import random
-from typing import Optional, Dict, Any
-from datetime import datetime
+from typing import Optional, Dict, Any, List, Tuple
 
 logger = logging.getLogger("TradeMaster.LLM")
 
 class LLMEngine:
-    """
-    Simple LLM engine for TradeMaster (Phase 1).
-    This version provides better placeholder responses until we implement
-    the full API connection in Phase 2.
+    """LLM engine for TradeMaster.
+    
+    This implementation integrates with Groq LLM API to generate
+    responses to user queries. It maintains conversation history and provides a consistent
+    trading assistant persona through a well-defined system prompt.
+    
+    Features:
+    1. Integration with Groq LLM API
+    2. Conversation history management
+    3. Trading assistant persona with market knowledge
+    4. Fallback mechanisms for API failures
     """
     
     def __init__(self):
-        # Just initialize with basic configuration
-        self.groq_api_key = os.getenv("GROQ_API_KEY")
-        self.groq_model = os.getenv("GROQ_MODEL", "llama3-70b-8192")
-        self.openai_api_key = os.getenv("OPENAI_API_KEY")
-        self.openai_model = os.getenv("OPENAI_MODEL", "gpt-4o")
+        # Initialize API configurations
+        self.groq_api_key = os.getenv("GROQ_API_KEY")  # API key for Groq LLM service
+        self.groq_model = os.getenv("GROQ_MODEL", "llama3-70b-8192")  # Default model for Groq
         
-        # Initialize response templates
-        self._init_response_templates()
+        # Define system prompt for trading assistant persona
+        self.system_prompt = self._get_system_prompt()
         
-        logger.info("LLM Engine initialized in Phase 1 mode (no API connections)")
+        # Initialize fallback responses for when API calls fail
+        self._init_fallback_responses()
+        
+        # Log initialization with available APIs
+        self._log_initialization()
     
-    def _init_response_templates(self):
-        """Initialize response templates for different query types."""
-        # Best trades responses
-        self.best_trades_responses = [
-            "While I can't provide specific trade recommendations in my current version, the market has been showing interesting movements in tech and renewable energy sectors. In the future, I'll be able to analyze real-time market data to suggest potential opportunities.",
-            
-            "I'm still in development mode, but when fully implemented, I'll be able to analyze market trends, technical patterns, and news sentiment to suggest potential trades. For now, remember that proper risk management is always more important than chasing the 'best' trades.",
-            
-            "Once I'm fully operational, I'll help identify trading opportunities based on technical analysis, fundamentals, and market sentiment. For now, I'd recommend focusing on assets with strong fundamentals and clear technical setups rather than seeking quick gains.",
-            
-            "In my current version, I can't access real-time market data, but I'm designed to eventually analyze multiple timeframes, support/resistance levels, and volume profiles to identify high-probability setups. Always do your own research before making any trades."
-        ]
+    def _get_system_prompt(self) -> str:
+        """Define the system prompt that establishes the assistant's persona.
         
-        # Market analysis responses
-        self.market_analysis_responses = [
-            "Market analysis is one of my core functions, but I'm currently in development mode. Soon I'll be able to provide in-depth analysis of price action, trend strength, volume patterns, and key support/resistance levels across various assets.",
-            
-            "Once fully implemented, I'll analyze markets using both technical and fundamental approaches, including trend analysis, volatility assessments, and sector rotation insights. For now, I'm limited to general discussions about market concepts.",
-            
-            "My full version will include capabilities for analyzing market conditions, sector performance, correlation between assets, and risk metrics. I'll be able to process historical data to identify patterns and potential market drivers."
-        ]
-        
-        # Crypto responses
-        self.crypto_responses = [
-            "Cryptocurrency markets are highly volatile and influenced by multiple factors including technological developments, regulatory news, and market sentiment. When fully operational, I'll track these factors to provide more informed analysis.",
-            
-            "The crypto space moves quickly, with factors like protocol upgrades, adoption metrics, and regulatory developments playing key roles. In my completed version, I'll monitor these aspects to provide more comprehensive insights.",
-            
-            "While I'm currently in development mode, my full version will track on-chain metrics, exchange flows, funding rates, and sentiment indicators to provide a holistic view of the cryptocurrency markets."
-        ]
-        
-        # General trading responses
-        self.general_trading_responses = [
-            "Trading involves balancing risk and reward through careful analysis and strategy development. Once I'm fully implemented, I'll assist with developing and backtesting trading strategies based on your specific goals and risk tolerance.",
-            
-            "Successful trading typically requires a combination of technical analysis, fundamental understanding, and solid risk management. In my completed version, I'll be able to help with all these aspects by providing tools and insights tailored to your approach.",
-            
-            "When I'm fully operational, I'll provide support for various trading approaches from day trading to position trading, with tools for technical analysis, market sentiment assessment, and risk calculation."
-        ]
-        
-        # Default responses
-        self.default_responses = [
-            "I'm currently being developed to provide trading and market analysis assistance. Soon I'll be able to help with specific trading questions, market insights, and financial education.",
-            
-            "As a trading assistant, I'm designed to provide market insights, technical analysis, and trading education. My capabilities are still being developed, but I'll soon be able to offer more detailed assistance.",
-            
-            "I'm TradeMaster, a trading assistant currently in development. In the future, I'll provide detailed analysis of markets, trading strategies, and financial concepts to help with your trading journey."
-        ]
-    
-    def _detect_query_type(self, message: str) -> str:
-        """
-        Detect the type of query to provide a more relevant response.
-        
-        Args:
-            message: The user's message
-            
         Returns:
-            Query type: 'best_trades', 'market_analysis', 'crypto', 'general_trading', or 'default'
+            A comprehensive system prompt string that defines the assistant's identity,
+            knowledge areas, and interaction style.
         """
-        message_lower = message.lower()
+        return """
+        You are TradeMaster, an expert trading assistant with deep knowledge of financial markets, 
+        trading strategies, and investment concepts. Your purpose is to provide accurate, 
+        educational, and actionable insights to traders of all experience levels.
         
-        # Check for best trades queries
-        if any(phrase in message_lower for phrase in [
-            "best trade", "best stock", "best investment", "what to buy", 
-            "what to trade", "trading opportunity", "good investment"
-        ]):
-            return "best_trades"
+        Your areas of expertise include:
+        1. Technical analysis (chart patterns, indicators, price action)
+        2. Fundamental analysis (economic indicators, financial statements, market news)
+        3. Trading psychology and risk management
+        4. Market structure and mechanics across different asset classes
+        5. Trading strategies and their implementation
         
-        # Check for market analysis queries
-        if any(phrase in message_lower for phrase in [
-            "market analysis", "technical analysis", "chart", "trend", "pattern",
-            "support", "resistance", "indicator", "analysis", "forecast", "outlook"
-        ]):
-            return "market_analysis"
+        When responding to queries:
+        - Provide educational content that helps users understand concepts, not just answers
+        - Be clear about the limitations of your knowledge and avoid making specific price predictions
+        - Emphasize risk management principles and responsible trading practices
+        - Adapt your explanations to the user's apparent level of expertise
+        - Use precise terminology and explain jargon when necessary
         
-        # Check for crypto queries
-        if any(phrase in message_lower for phrase in [
-            "crypto", "bitcoin", "ethereum", "btc", "eth", "token", "blockchain",
-            "altcoin", "defi", "nft", "mining", "wallet", "exchange"
-        ]):
-            return "crypto"
-        
-        # Check for general trading queries
-        if any(phrase in message_lower for phrase in [
-            "trading strategy", "risk management", "position size", "stop loss",
-            "take profit", "entry", "exit", "trading plan", "backtest",
-            "day trading", "swing trading", "position trading", "scalping"
-        ]):
-            return "general_trading"
-        
-        # Default case
-        return "default"
+        You have access to tools that can provide real-time market data and analysis.
+        When appropriate, suggest using these tools to enhance your responses with current information.
+        """.strip()
     
-    async def generate_response(self, 
-                                message: str, 
-                                user_id: str, 
-                                context: Optional[Dict[str, Any]] = None) -> str:
-        """
-        Generate a response to a user message.
+    def _init_fallback_responses(self):
+        """Initialize fallback responses for when API calls fail.
         
-        Args:
-            message: The user's message
-            user_id: The user's ID
-            context: Optional context information
-            
-        Returns:
-            A string response
+        These responses are used only when external LLM API calls fail, to ensure
+        the system can still provide some value to users.
         """
-        # In Phase 1, return template responses based on query type
-        query_type = self._detect_query_type(message)
-        
-        # Get appropriate response templates
-        if query_type == "best_trades":
-            responses = self.best_trades_responses
-        elif query_type == "market_analysis":
-            responses = self.market_analysis_responses
-        elif query_type == "crypto":
-            responses = self.crypto_responses
-        elif query_type == "general_trading":
-            responses = self.general_trading_responses
+        self.fallback_responses = [
+            "I'm having trouble connecting to my knowledge base right now. As a trading assistant, I can tell you that successful trading typically involves a combination of technical analysis, fundamental research, and disciplined risk management. Could you try your question again in a moment?",
+            "It seems I'm experiencing a temporary issue accessing my full capabilities. In general, when analyzing markets, it's important to consider multiple timeframes and confirm signals across different indicators. I should be back to normal shortly.",
+            "I apologize for the inconvenience, but I'm currently unable to process your request fully. Remember that proper position sizing and risk management are foundational to any successful trading strategy. Please try again soon."
+        ]
+    
+    def _log_initialization(self):
+        """Log the initialization status of the LLM Engine."""
+        if self.groq_api_key:
+            logger.info(f"LLM Engine initialized with Groq API ({self.groq_model})")
         else:
-            responses = self.default_responses
+            logger.warning("LLM Engine initialized without Groq API key. Will use fallback responses only.")
+    
+    async def generate_response(self, message: str, user_id: str, context: Optional[Dict[str, Any]] = None) -> str:
+        """Generate a response to a user message using Groq LLM API.
         
-        # Select a random response from the appropriate category
-        response = random.choice(responses)
+        This is the main entry point for processing user queries. It attempts to use
+        the Groq LLM API, with fallbacks if API calls fail.
         
-        logger.info(f"Generated Phase 1 response for query type: {query_type}")
+        Args:
+            message: The user's message text
+            user_id: The user's ID for conversation history management
+            context: Optional context information containing conversation history
+            
+        Returns:
+            A formatted response string addressing the user's query
+        """
+        # Log the incoming message
+        logger.info(f"Generating response for user {user_id}: {message[:50]}...")
         
-        return response
+        # Get conversation history from context if available
+        conversation_history = []
+        if context and 'message_history' in context:
+            conversation_history = context.get('message_history', [])
+        
+        # Try Groq API if available
+        if self.groq_api_key:
+            try:
+                response = await self._call_groq_api(message, conversation_history)
+                logger.info("Generated response using Groq API")
+                return response
+            except Exception as e:
+                logger.error(f"Groq API call failed: {str(e)}")
+                # Use fallback response if API call fails
+                logger.warning("API call failed, using fallback response")
+                return random.choice(self.fallback_responses)
+        else:
+            # Use fallback response if no API key is available
+            logger.warning("No Groq API key available, using fallback response")
+            return random.choice(self.fallback_responses)
+    
+    async def _call_groq_api(self, message: str, conversation_history: List[Dict[str, str]]) -> str:
+        """Call the Groq LLM API to generate a response.
+        
+        Args:
+            message: The user's message
+            conversation_history: List of previous messages in the conversation
+            
+        Returns:
+            The generated response text
+        
+        Raises:
+            Exception: If the API call fails
+        """
+        url = "https://api.groq.com/openai/v1/chat/completions"
+        headers = {
+            "Authorization": f"Bearer {self.groq_api_key}",
+            "Content-Type": "application/json"
+        }
+        
+        # Prepare messages array with system prompt and conversation history
+        messages = [{"role": "system", "content": self.system_prompt}]
+        
+        # Add conversation history - filter out unsupported fields like 'timestamp'
+        for msg in conversation_history:
+            if 'role' in msg and 'content' in msg:
+                messages.append({
+                    "role": msg['role'],
+                    "content": msg['content']
+                })
+        
+        # Add the current user message
+        messages.append({"role": "user", "content": message})
+        
+        payload = {
+            "model": self.groq_model,
+            "messages": messages,
+            "temperature": 0.7,
+            "max_tokens": 1024
+        }
+        
+        # Make the API call
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, headers=headers, json=payload) as response:
+                if response.status != 200:
+                    error_text = await response.text()
+                    raise Exception(f"Groq API returned status {response.status}: {error_text}")
+                
+                data = await response.json()
+                return data["choices"][0]["message"]["content"]
