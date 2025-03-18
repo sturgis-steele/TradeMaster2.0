@@ -1,89 +1,68 @@
-# TradeMaster Discord Bot - Client
-# This file defines the TradeMasterClient class which handles Discord events and command processing.
-# It manages user interactions, message filtering, and communication with the LLM engine.
-#
-# File Interactions:
-# - main.py: Imports and instantiates TradeMasterClient
-# - utils/gatekeeper.py: Uses Gatekeeper for message filtering
-# - core/llm_engine.py: Uses LLMEngine for processing user messages
-# - Discord API: Connects to Discord and handles events
+"""
+TradeMaster 2.0 Discord Client
+Handles Discord events and interactions.
+"""
 
 import discord
 from discord import app_commands
 from discord.ext import commands
 import logging
 import asyncio
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 from datetime import datetime
 
-# Import our gatekeeper and main LLM
-from utils.gatekeeper import Gatekeeper
-from core.llm_engine import LLMEngine  # This would be your main LLM component
+# Fix imports by using the "sys.path" approach
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Logger for this module
+# Now import from core directly
+from core.llm import LLMEngine
+from core.context import ContextManager
+from core.gatekeeper import Gatekeeper
+
+# Set up logger for this module
 logger = logging.getLogger("TradeMaster.Client")
 
 class TradeMasterClient(commands.Bot):
-    """
-    The main Discord bot client for TradeMaster.
-    Handles Discord events and interactions.
-    """
+    """Main Discord bot client for TradeMaster."""
     
     def __init__(self):
-        # Set up intents (permissions) for the bot
+        # Set up intents
         intents = discord.Intents.default()
-        intents.message_content = True  # Needed to read message content
-        intents.members = True  # Needed for user-related features
+        intents.message_content = True
+        intents.members = True
         
-        # Initialize the bot with slash commands
+        # Initialize bot with command prefix
         super().__init__(
-            command_prefix="!",  # We'll still have a prefix for legacy commands but won't use it
+            command_prefix="!",  # Traditional prefix for fallback
             intents=intents,
-            help_command=None,  # Disable default help command
+            help_command=None  # Disable default help command
         )
         
-        # Dictionary to store active user conversations/contexts
-        self.user_contexts: Dict[int, Any] = {}
+        # Initialize components (placeholders for now)
+        self.context_manager = ContextManager()
+        self.llm_engine = LLMEngine()
+        self.gatekeeper = Gatekeeper()
         
-        # Initialize the gatekeeper
-        self.gatekeeper = Gatekeeper(
-            model_name="gemma3:1b",  # Using available local model
-            ollama_base_url="http://localhost:11434"  # Adjust as needed
-        )
-        logger.info("Initialized gatekeeper for message filtering")
-        
-        # Initialize the main LLM engine
-        self.llm_engine = LLMEngine()  # This would be your main LLM component
-        logger.info("Initialized main LLM engine")
+        logger.info("TradeMaster client initialized")
     
     async def setup_hook(self):
-        """
-        Called when the bot is being set up.
-        We'll use this to register slash commands.
-        """
-        # Register slash commands
-        @self.tree.command(name="help", description="Get help with using TradeMaster")
-        async def help_command(interaction: discord.Interaction):
-            """Slash command for getting help."""
-            embed = discord.Embed(
-                title="TradeMaster Help",
-                description="I'm an AI assistant for trading discussions. You can talk to me normally in any channel or use /help for this message.",
-                color=discord.Color.blue()
-            )
-            await interaction.response.send_message(embed=embed)
+        """Register slash commands when the bot is being set up."""
+        # Load commands from bot/commands.py
+        from bot.commands import setup_commands
+        await setup_commands(self)
         
-        # Sync the commands with Discord
+        # Sync commands with Discord
         await self.tree.sync()
         logger.info("Slash commands synchronized")
     
     async def on_ready(self):
-        """
-        Event handler called when the bot has connected to Discord.
-        """
-        logger.info(f'{self.user} has connected to Discord!')
-        logger.info(f'Bot is connected to {len(self.guilds)} guilds')
+        """Handle the bot's connection to Discord."""
+        logger.info(f"Bot connected as {self.user}")
+        logger.info(f"Connected to {len(self.guilds)} servers")
         
-        # Set the bot's status/activity
+        # Set presence (status)
         activity = discord.Activity(
             type=discord.ActivityType.watching,
             name="markets | /help"
@@ -91,77 +70,38 @@ class TradeMasterClient(commands.Bot):
         await self.change_presence(activity=activity)
     
     async def on_message(self, message):
-        """
-        Event handler called when a message is received.
-        """
-        # Ignore messages from the bot itself
+        """Handle incoming messages."""
+        # Ignore own messages
         if message.author == self.user:
             return
         
-        # Skip processing for messages that look like commands (they'll be handled by Discord's interaction system)
-        if message.content.startswith('/'):
+        # Process commands with the command prefix
+        await self.process_commands(message)
+        
+        # Ignore messages with a prefix or from bots
+        if message.content.startswith(self.command_prefix) or message.author.bot:
             return
         
-        # Get or create user context
-        user_id = message.author.id
-        if user_id not in self.user_contexts:
-            self.user_contexts[user_id] = {}
-        
-        # Update context with the latest message time
-        self.user_contexts[user_id]["last_seen"] = datetime.now().isoformat()
+        # Update user context
+        user_id = str(message.author.id)
+        self.context_manager.update_last_message(user_id, message.content)
         
         try:
-            # First, use the gatekeeper to decide if this message needs a response
-            verdict = await self.gatekeeper.evaluate_message(
-                message.content,
-                str(user_id),
-                self.user_contexts[user_id]
-            )
+            # For Phase 1: Simple response to mentions
+            bot_mentioned = self.user.mentioned_in(message)
             
-            # Log the gatekeeper's decision at INFO level to ensure it's captured
-            logger.info(f"Gatekeeper verdict: {verdict.should_respond} ({verdict.confidence:.2f}) - {verdict.reason}")
-            # Also log at debug level for more detailed logs
-            logger.debug(f"Full gatekeeper verdict details: {verdict}")
+            # In Phase 2, we'll replace this with proper gatekeeper logic
+            should_respond = bot_mentioned
             
-            # Only process with the main LLM if the gatekeeper approves
-            if verdict.should_respond:
-                # Show typing indicator while processing
+            if should_respond:
                 async with message.channel.typing():
-                    # Log user_id type before passing to LLM engine
-                    logger.debug(f"Passing user_id to LLM engine: {user_id} (type: {type(user_id).__name__})")
-                    logger.debug(f"Context being passed to LLM engine: {list(self.user_contexts[user_id].keys())}")
+                    # For Phase 1: Simple static response
+                    # In Phase 2, we'll use the LLM for responses
+                    response = "Hello! I'm TradeMaster, a trading assistant bot. I'm currently being rebuilt with improved capabilities. For now, I can only respond to basic mentions."
                     
-                    # Call the main LLM engine to process the message
-                    response, tool_used = await self.llm_engine.process_message(
-                        message.content, 
-                        user_id=user_id,  # This is an integer from message.author.id
-                        context=self.user_contexts[user_id]
-                    )
-                    
-                    logger.debug(f"Received response from LLM engine: {response[:50]}...")
-                    
-                    # Send the response - try to reply, but fall back to regular send if permissions are missing
-                    try:
-                        await message.reply(response)
-                    except discord.errors.Forbidden as e:
-                        if e.code == 160002:  # Cannot reply without permission to read message history
-                            logger.warning("Cannot reply due to missing permissions, using channel.send instead")
-                            await message.channel.send(f"{message.author.mention} {response}")
-                        else:
-                            # Re-raise if it's a different permission issue
-                            raise
-                    
-                    # Update context with interaction info
-                    self.user_contexts[user_id]["last_interaction_time"] = datetime.now().isoformat()
-                    self.user_contexts[user_id]["last_message"] = message.content
-                    
-                    # Log the tool usage for analytics
-                    if tool_used:
-                        logger.info(f"Tool used: {tool_used} by user {message.author.name}")
-                        self.user_contexts[user_id]["last_tool"] = tool_used
+                    await message.reply(response)
         
         except Exception as e:
             logger.error(f"Error processing message: {e}")
-            # Only reply with an error if the gatekeeper thought we should respond
-            if 'verdict' in locals() and verdict.should_respond:
-                await message.reply("I encountered an error processing your request. Please try again later.")
+            if bot_mentioned:
+                await message.reply("I encountered an error. My developers are working on it!")

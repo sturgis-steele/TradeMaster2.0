@@ -1,62 +1,55 @@
-# TradeMaster Discord Bot - Entry Point
-# This file serves as the main entry point for the TradeMaster Discord bot.
-# It sets up logging, loads environment variables from the .env file,
-# initializes the bot client, and starts the Discord connection.
-#
-# File Interactions:
-# - bot/client.py: Imports and instantiates TradeMasterClient
-# - config/.env: Loads environment variables and Discord token
-# - data/trademaster.log: Writes log output
-# - utils/logging.py: Uses logging configuration
+#!/usr/bin/env python3
+"""
+TradeMaster 2.0 - Discord Trading Assistant Bot
+Entry point for the bot application.
+"""
 
-import asyncio  # For running asynchronous code (allows the bot to handle multiple tasks at once)
-import discord  # For Discord API interactions and error types
-import logging  # For creating log files and console output to track what the bot is doing
-import os  # For accessing environment variables and file paths
-from dotenv import load_dotenv  # For loading API keys and secrets from a .env file
+import sys
+import os
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-# Import the main Discord bot client class from our bot module
+import asyncio
+import logging
+import os
+from dotenv import load_dotenv
+
+# Import bot client
 from bot.client import TradeMasterClient
-
-# Import our custom logging setup
 from utils.logging import setup_logging
 
-# Set up logging using our custom configuration
+# Set up logging
 logger = setup_logging()
 
-# Load secret keys and configuration from the .env file
-load_dotenv("config/.env")
-# Get the Discord bot token (this is like the bot's password to connect to Discord)
+# Load environment variables
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", ".env")
+if os.path.exists(config_path):
+    load_dotenv(config_path)
+else:
+    # If .env doesn't exist yet, try to find sample.env
+    sample_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config", "sample.env")
+    if os.path.exists(sample_path):
+        load_dotenv(sample_path)
+        logger.warning("Using sample.env for configuration. Create a .env file with your actual credentials.")
+    else:
+        logger.warning("No .env or sample.env found. Make sure to set up your environment variables.")
+
 TOKEN = os.getenv("DISCORD_TOKEN")
 
 async def main():
-    """The main function that starts the bot"""
-    # Create an instance of our Discord bot client
+    """Main entry point for the TradeMaster bot."""
+    # Validate token
+    if not TOKEN:
+        logger.critical("Discord token not found! Check your .env file.")
+        return
+
+    # Initialize the bot client
     client = TradeMasterClient()
     
-    # Validate the token before attempting to connect
-    if not TOKEN or len(TOKEN) < 50:  # Discord tokens are typically longer than 50 chars
-        logger.error("Invalid Discord token! Please check your .env file.")
-        logger.error("The bot will not be able to connect to Discord without a valid token.")
-        logger.error("You may need to regenerate your token in the Discord Developer Portal.")
-        return
-        
     try:
-        # Connect to Discord and start the bot (using the token from our .env file)
-        # This is an 'await' call because connecting to Discord happens asynchronously
-        logger.info("Attempting to connect to Discord...")
+        logger.info("Starting TradeMaster Discord bot...")
         await client.start(TOKEN)
-    except discord.errors.LoginFailure as e:
-        logger.error(f"Failed to login to Discord: {e}")
-        logger.error("Please check your token in the .env file and ensure it is valid.")
-        logger.error("You may need to regenerate your token in the Discord Developer Portal.")
     except Exception as e:
-        logger.error(f"An unexpected error occurred while connecting to Discord: {e}")
-        logger.error("Please check your internet connection and Discord's status.")
+        logger.critical(f"Failed to start bot: {e}")
 
-# This is the entry point of the program
-# It only runs if this file is executed directly (not imported by another file)
 if __name__ == "__main__":
-    # Run the main function using asyncio
-    # asyncio.run() is the proper way to start an async function from a non-async context
     asyncio.run(main())

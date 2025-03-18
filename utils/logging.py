@@ -1,18 +1,17 @@
-# TradeMaster Discord Bot - Logging Configuration
-# This file provides a centralized logging configuration for the TradeMaster bot.
-# It sets up proper logging levels, formats, and handlers for different components.
+"""
+Logging configuration for the TradeMaster 2.0 bot.
+Sets up console and file logging with appropriate formatting.
+"""
 
 import logging
 import os
 from logging.handlers import RotatingFileHandler
 
 def setup_logging():
-    """
-    Configure the logging system for the TradeMaster bot.
-    Sets up console and file logging with appropriate formatting.
-    """
-    # Ensure the data directory exists
-    os.makedirs("data", exist_ok=True)
+    """Configure the logging system for the TradeMaster bot."""
+    # Ensure the logs directory exists
+    log_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs")
+    os.makedirs(log_dir, exist_ok=True)
     
     # Create formatters
     console_formatter = logging.Formatter('%(levelname)s - %(name)s - %(message)s')
@@ -23,34 +22,34 @@ def setup_logging():
     console_handler.setLevel(logging.INFO)
     console_handler.setFormatter(console_formatter)
     
-    # Create file handler with rotation (10 MB max size, keep 5 backup files)
+    # Create file handler with rotation
+    log_file = os.path.join(log_dir, "trademaster.log")
     file_handler = RotatingFileHandler(
-        "data/trademaster.log", 
-        maxBytes=10*1024*1024,  # 10 MB
-        backupCount=5
+        log_file, 
+        maxBytes=5*1024*1024,  # 5 MB
+        backupCount=3
     )
-    file_handler.setLevel(logging.DEBUG)  # Log everything to file
+    file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(file_formatter)
     
     # Configure root logger
     root_logger = logging.getLogger()
     root_logger.setLevel(logging.INFO)
     
-    # Remove any existing handlers to avoid duplicates
-    for handler in root_logger.handlers[:]:  
+    # Remove existing handlers to avoid duplicates
+    for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
     
     # Add our handlers
     root_logger.addHandler(console_handler)
     root_logger.addHandler(file_handler)
     
-    # Set up specific loggers with appropriate levels
-    logging.getLogger('discord').setLevel(logging.INFO)
+    # Set specific logger levels
+    logging.getLogger('discord').setLevel(logging.WARNING)
     logging.getLogger('discord.http').setLevel(logging.WARNING)
-    logging.getLogger('discord.gateway').setLevel(logging.INFO)
     
-    # Create a logger specifically for our bot
+    # Create a logger for our bot
     bot_logger = logging.getLogger("TradeMaster")
-    bot_logger.setLevel(logging.DEBUG)  # Capture all bot logs
+    bot_logger.setLevel(logging.DEBUG)
     
     return bot_logger
