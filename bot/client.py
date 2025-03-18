@@ -5,11 +5,12 @@ Handles Discord events and interactions.
 
 import discord
 from discord import app_commands
-from discord.ext import commands
+from discord.ext import commands, tasks
 import logging
 import asyncio
 from typing import Dict, Any, Optional
 from datetime import datetime
+import os
 
 # Fix imports by using the "sys.path" approach
 import sys
@@ -40,10 +41,14 @@ class TradeMasterClient(commands.Bot):
             help_command=None  # Disable default help command
         )
         
-        # Initialize components (placeholders for now)
+        # Initialize components
         self.context_manager = ContextManager()
         self.llm_engine = LLMEngine()
-        self.gatekeeper = Gatekeeper()
+        
+        # Initialize the Ollama-based gatekeeper
+        ollama_model = os.getenv("OLLAMA_MODEL", "gemma3:1b")
+        ollama_url = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
+        self.gatekeeper = Gatekeeper(model_name=ollama_model, ollama_base_url=ollama_url)
         
         logger.info("TradeMaster client initialized")
     
@@ -68,6 +73,9 @@ class TradeMasterClient(commands.Bot):
             name="markets | /help"
         )
         await self.change_presence(activity=activity)
+        
+        # Start background tasks
+        self.cleanup_contexts.start()
     
     async def on_message(self, message):
         """Handle incoming messages."""
@@ -84,24 +92,58 @@ class TradeMasterClient(commands.Bot):
         
         # Update user context
         user_id = str(message.author.id)
+        channel_id = str(message.channel.id)
         self.context_manager.update_last_message(user_id, message.content)
         
+        # Add channel ID to context
+        user_context = self.context_manager.get_context(user_id)
+        user_context['channel_id'] = channel_id
+        
         try:
-            # For Phase 1: Simple response to mentions
+            # Check if the bot is mentioned
             bot_mentioned = self.user.mentioned_in(message)
             
-            # In Phase 2, we'll replace this with proper gatekeeper logic
-            should_respond = bot_mentioned
+            # Use the Ollama-based gatekeeper to determine if we should respond
+            # Note: Removed the user_mentioned parameter to match the new Gatekeeper
+            verdict = await self.gatekeeper.should_respond(
+                message.content, 
+                user_id, 
+                bot_mentioned=bot_mentioned,
+                context=user_context
+            )
             
-            if should_respond:
+            if verdict.should_respond:
                 async with message.channel.typing():
-                    # For Phase 1: Simple static response
-                    # In Phase 2, we'll use the LLM for responses
-                    response = "Hello! I'm TradeMaster, a trading assistant bot. I'm currently being rebuilt with improved capabilities. For now, I can only respond to basic mentions."
+                    # Generate response using LLM engine
+                    response = await self.llm_engine.generate_response(
+                        message.content,
+                        user_id,
+                        context=user_context
+                    )
                     
+                    # Update context with bot's response
+                    self.context_manager.add_bot_response(user_id, response)
+                    
+                    # Reply to the message
                     await message.reply(response)
+                    logger.info(f"Responded to message from {message.author.name}: {message.content[:50]}...")
+            else:
+                logger.debug(f"Ignoring message from {message.author.name}: {message.content[:50]}...")
         
         except Exception as e:
             logger.error(f"Error processing message: {e}")
             if bot_mentioned:
-                await message.reply("I encountered an error. My developers are working on it!")
+                await message.reply("I encountered an error processing your request. Please try again later.")
+    
+    @tasks.loop(hours=6)
+    async def cleanup_contexts(self):
+        """Periodically clean up expired user contexts."""
+        try:
+            self.context_manager.clean_expired_contexts()
+        except Exception as e:
+            logger.error(f"Error cleaning up contexts: {e}")
+            
+    @cleanup_contexts.before_loop
+    async def before_cleanup(self):
+        """Wait until the bot is ready before starting the cleanup task."""
+        await self.wait_until_ready()
