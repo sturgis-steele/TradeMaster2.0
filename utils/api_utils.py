@@ -38,8 +38,15 @@ async def make_api_request(url: str, headers: Dict[str, str] = None,
             async with session.get(url, headers=headers, params=params) as response:
                 if response.status != 200:
                     logger.error(f"API request failed: {response.status} - {url}")
-                    return False, {"error": f"API request failed with status {response.status}", 
-                                  "status": response.status}
+                    
+                    # Try to get more details from the response
+                    try:
+                        error_data = await response.json()
+                        error_message = error_data.get('message', f"Status {response.status}")
+                    except:
+                        error_message = f"API request failed with status {response.status}"
+                    
+                    return False, {"error": error_message, "status": response.status}
                 
                 data = await response.json()
                 return True, data
@@ -51,27 +58,35 @@ async def make_api_request(url: str, headers: Dict[str, str] = None,
         logger.error(f"Unexpected error in API request: {e} - {url}")
         return False, {"error": f"Unexpected error: {str(e)}"}
 
-def get_coingecko_url(endpoint: str, use_pro: bool = True) -> Tuple[str, Dict[str, str]]:
+def get_coingecko_url(endpoint: str, use_pro: bool = True) -> Tuple[str, Dict[str, str], Dict[str, Any]]:
     """
-    Get the appropriate CoinGecko URL and headers based on whether a Pro API key is available.
+    Get the appropriate CoinGecko URL, headers, and params based on whether a Pro API key is available.
     
     Args:
         endpoint: The API endpoint (without leading slash)
         use_pro: Whether to use the Pro API if available
         
     Returns:
-        Tuple of (url, headers)
+        Tuple of (url, headers, params)
     """
     api_key = os.getenv("COINGECKO_API_KEY")
+    params = {}
+    
+    # Ensure no leading slash in endpoint
+    if endpoint.startswith('/'):
+        endpoint = endpoint[1:]
     
     if api_key and use_pro:
         base_url = COINGECKO_PRO_BASE_URL
+        # For Pro API, the key should be in the x-cg-pro-api-key header
         headers = {"x-cg-pro-api-key": api_key}
+        logger.debug(f"Using CoinGecko Pro API for endpoint: {endpoint}")
     else:
         base_url = COINGECKO_BASE_URL
         headers = {}
+        logger.debug(f"Using CoinGecko Public API for endpoint: {endpoint}")
     
-    return f"{base_url}/{endpoint}", headers
+    return f"{base_url}/{endpoint}", headers, params
 
 def get_alphavantage_params(function: str, symbol: str, **kwargs) -> Dict[str, str]:
     """

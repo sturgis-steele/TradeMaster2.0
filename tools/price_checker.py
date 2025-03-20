@@ -2,7 +2,8 @@
 Market Price Checker Tool for TradeMaster 2.0
 
 This tool retrieves current price information for stocks and cryptocurrencies.
-It uses both CoinGecko for crypto prices and Alpha Vantage for stock prices.
+It uses both CoinGecko for crypto prices and Alpha Vantage for stock prices,
+with fallback options when primary sources fail.
 """
 
 import logging
@@ -122,9 +123,10 @@ class PriceCheckerTool(BaseTool):
         else:
             return "stock"
     
-    async def _get_crypto_price(self, symbol: str) -> Dict[str, Any]:
+    async def _get_crypto_price_simple(self, symbol: str) -> Dict[str, Any]:
         """
-        Get cryptocurrency price from CoinGecko.
+        Get cryptocurrency price using the simple price endpoint.
+        This is an alternative that might work better with the Pro API.
         
         Args:
             symbol: The crypto symbol (e.g., BTC, ETH)
@@ -137,15 +139,152 @@ class PriceCheckerTool(BaseTool):
         # Convert symbol to CoinGecko ID if known
         coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
         
-        # Get appropriate URL and headers
-        url, headers = get_coingecko_url(f"coins/{coin_id}")
+        # Try Pro API first if key available
+        if self.coingecko_api_key:
+            # Use the simple/price endpoint instead
+            url, headers, params = get_coingecko_url("simple/price", use_pro=True)
+            
+            # Add required parameters
+            params.update({
+                "ids": coin_id,
+                "vs_currencies": "usd",
+                "include_market_cap": "true",
+                "include_24hr_vol": "true",
+                "include_24hr_change": "true",
+                "include_last_updated_at": "true"
+            })
+            
+            # Make API request
+            success, data = await make_api_request(url, headers, params)
+            
+            if success and coin_id in data:
+                # Format the response
+                coin_data = data[coin_id]
+                return {
+                    "symbol": symbol_upper,
+                    "name": self.coingecko_ids.get(symbol_upper, coin_id).capitalize(),
+                    "price_usd": coin_data.get("usd"),
+                    "price_change_24h": coin_data.get("usd_24h_change"),
+                    "market_cap": coin_data.get("usd_market_cap"),
+                    "volume_24h": coin_data.get("usd_24h_vol"),
+                    "time": datetime.now().isoformat(),
+                    "source": "CoinGecko Pro API"
+                }
+            
+            logger.warning(f"CoinGecko Pro API simple/price failed, trying public API: {data.get('error', 'Unknown error')}")
+        
+        # Fall back to public API
+        url, headers, params = get_coingecko_url("simple/price", use_pro=False)
+        
+        # Add parameters
+        params.update({
+            "ids": coin_id,
+            "vs_currencies": "usd",
+            "include_market_cap": "true",
+            "include_24hr_vol": "true",
+            "include_24hr_change": "true",
+            "include_last_updated_at": "true"
+        })
         
         # Make API request
-        success, data = await make_api_request(url, headers)
+        success, data = await make_api_request(url, headers, params)
         
         if not success:
-            return data  # Error response is already formatted
+            return data  # Error response
         
+        if coin_id not in data:
+            return format_error_response(symbol, f"No data found for {coin_id}")
+        
+        # Format the response
+        coin_data = data[coin_id]
+        return {
+            "symbol": symbol_upper,
+            "name": self.coingecko_ids.get(symbol_upper, coin_id).capitalize(),
+            "price_usd": coin_data.get("usd"),
+            "price_change_24h": coin_data.get("usd_24h_change"),
+            "market_cap": coin_data.get("usd_market_cap"),
+            "volume_24h": coin_data.get("usd_24h_vol"),
+            "time": datetime.now().isoformat(),
+            "source": "CoinGecko Public API"
+        }
+    
+    async def _get_crypto_price(self, symbol: str) -> Dict[str, Any]:
+        """
+        Get cryptocurrency price from CoinGecko with fallback.
+        
+        Args:
+            symbol: The crypto symbol (e.g., BTC, ETH)
+            
+        Returns:
+            Dictionary with price information
+        """
+        # Try the simple endpoint first
+        result = await self._get_crypto_price_simple(symbol)
+        
+        # If successful, return the result
+        if "error" not in result:
+            return result
+        
+        # Otherwise try the detailed endpoint
+        symbol_upper = symbol.upper()
+        
+        # Convert symbol to CoinGecko ID if known
+        coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
+        
+        # First try using Pro API if key available
+        if self.coingecko_api_key:
+            # Get appropriate URL, headers, and params for Pro API
+            url, headers, params = get_coingecko_url(f"coins/{coin_id}", use_pro=True)
+            
+            # For detailed coin info, include these parameters
+            params["localization"] = "false"
+            params["tickers"] = "false"
+            params["market_data"] = "true"
+            params["community_data"] = "false"
+            params["developer_data"] = "false"
+            
+            # Make API request
+            success, data = await make_api_request(url, headers, params)
+            
+            # If successful, process the data
+            if success:
+                return self._process_coingecko_data(data, symbol_upper, "CoinGecko Pro API")
+            
+            # Log the error but continue to fallback
+            logger.warning(f"CoinGecko Pro API failed for coins/{coin_id}, trying public API: {data.get('error', 'Unknown error')}")
+        
+        # Fallback to public CoinGecko API (no API key required)
+        url, headers, params = get_coingecko_url(f"coins/{coin_id}", use_pro=False)
+        
+        # For detailed coin info, include these parameters
+        params["localization"] = "false"
+        params["tickers"] = "false"
+        params["market_data"] = "true"
+        params["community_data"] = "false"
+        params["developer_data"] = "false"
+        
+        # Make API request
+        success, data = await make_api_request(url, headers, params)
+        
+        if not success:
+            logger.error(f"Both CoinGecko APIs failed for {symbol}: {data.get('error', 'Unknown error')}")
+            return data  # Return error response
+        
+        # Process the data
+        return self._process_coingecko_data(data, symbol_upper, "CoinGecko Public API")
+    
+    def _process_coingecko_data(self, data: Dict[str, Any], symbol: str, source: str = "CoinGecko") -> Dict[str, Any]:
+        """
+        Process CoinGecko response data into a standardized format.
+        
+        Args:
+            data: Raw response data from CoinGecko
+            symbol: The crypto symbol
+            source: The source of the data (e.g., "CoinGecko Pro API")
+            
+        Returns:
+            Dictionary with processed price information
+        """
         # Extract relevant information
         price_usd = data.get("market_data", {}).get("current_price", {}).get("usd")
         price_change_24h = data.get("market_data", {}).get("price_change_percentage_24h")
@@ -153,14 +292,14 @@ class PriceCheckerTool(BaseTool):
         volume_24h = data.get("market_data", {}).get("total_volume", {}).get("usd")
         
         return {
-            "symbol": symbol_upper,
+            "symbol": symbol,
             "name": data.get("name", "Unknown"),
             "price_usd": price_usd,
             "price_change_24h": price_change_24h,
             "market_cap": market_cap,
             "volume_24h": volume_24h,
             "time": datetime.now().isoformat(),
-            "source": "CoinGecko"
+            "source": source
         }
     
     async def _get_stock_price(self, symbol: str) -> Dict[str, Any]:
@@ -183,7 +322,7 @@ class PriceCheckerTool(BaseTool):
         params = get_alphavantage_params("GLOBAL_QUOTE", symbol_upper)
         
         # Make API request
-        success, data = await make_api_request("https://www.alphavantage.co/query", params=params)
+        success, data = await make_api_request("https://www.alphavantage.co/query", {}, params)
         
         if not success:
             return data  # Error response is already formatted

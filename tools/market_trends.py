@@ -83,52 +83,23 @@ class MarketTrendsTool(BaseTool):
         
         # For trending coins
         if category == "trending":
-            # Get appropriate URL and headers
-            url, headers = get_coingecko_url("search/trending")
+            # Try Pro API first if available
+            if self.coingecko_api_key:
+                # Get appropriate URL and headers
+                url, headers, params = get_coingecko_url("search/trending", use_pro=True)
+                
+                # Make API request
+                success, data = await make_api_request(url, headers, params)
+                
+                if success:
+                    # Extract trending coins
+                    return self._process_trending_coins(data, limit)
+                
+                # Log failure but continue to fallback
+                logger.warning(f"CoinGecko Pro API failed for trending, trying public API: {data.get('error', 'Unknown error')}")
             
-            # Make API request
-            success, data = await make_api_request(url, headers)
-            
-            if not success:
-                return data  # Error response is already formatted
-            
-            # Extract trending coins
-            trending_coins = data.get("coins", [])
-            
-            # Format results
-            results = []
-            for i, coin_data in enumerate(trending_coins[:limit]):
-                coin = coin_data.get("item", {})
-                results.append({
-                    "rank": i + 1,
-                    "symbol": coin.get("symbol", "").upper(),
-                    "name": coin.get("name", "Unknown"),
-                    "market_cap_rank": coin.get("market_cap_rank"),
-                    "price_btc": coin.get("price_btc"),
-                    "id": coin.get("id")
-                })
-            
-            return {
-                "category": "trending",
-                "market_type": "crypto",
-                "results": results,
-                "time": datetime.now().isoformat(),
-                "source": "CoinGecko"
-            }
-        
-        # For gainers and losers
-        else:
-            # Get appropriate URL and headers
-            url, headers = get_coingecko_url("coins/markets")
-            
-            params = {
-                "vs_currency": "usd",
-                "order": "market_cap_desc",
-                "per_page": 250,  # Get a good sample to find gainers/losers
-                "page": 1,
-                "sparkline": False,
-                "price_change_percentage": "24h"
-            }
+            # Fallback to public API
+            url, headers, params = get_coingecko_url("search/trending", use_pro=False)
             
             # Make API request
             success, data = await make_api_request(url, headers, params)
@@ -136,33 +107,113 @@ class MarketTrendsTool(BaseTool):
             if not success:
                 return data  # Error response is already formatted
             
-            # Sort by price change percentage
-            if category == "gainers":
-                sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0), reverse=True)
-            else:  # losers
-                sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0))
-            
-            # Format results
-            results = []
-            for i, coin in enumerate(sorted_data[:limit]):
-                results.append({
-                    "rank": i + 1,
-                    "symbol": coin.get("symbol", "").upper(),
-                    "name": coin.get("name", "Unknown"),
-                    "price_usd": coin.get("current_price"),
-                    "price_change_24h": coin.get("price_change_24h"),
-                    "price_change_percentage_24h": coin.get("price_change_percentage_24h"),
-                    "market_cap": coin.get("market_cap"),
-                    "volume_24h": coin.get("total_volume")
+            # Process trending coins
+            return self._process_trending_coins(data, limit)
+        
+        # For gainers and losers
+        else:
+            # Try Pro API first if available
+            if self.coingecko_api_key:
+                # Get appropriate URL and headers
+                url, headers, params = get_coingecko_url("coins/markets", use_pro=True)
+                
+                # Add query parameters
+                params.update({
+                    "vs_currency": "usd",
+                    "order": "market_cap_desc",
+                    "per_page": 250,  # Get a good sample to find gainers/losers
+                    "page": 1,
+                    "sparkline": "false",
+                    "price_change_percentage": "24h"
                 })
+                
+                # Make API request
+                success, data = await make_api_request(url, headers, params)
+                
+                if success:
+                    # Process markets data
+                    return self._process_markets_data(data, category, limit)
+                
+                # Log failure but continue to fallback
+                logger.warning(f"CoinGecko Pro API failed for {category}, trying public API: {data.get('error', 'Unknown error')}")
             
-            return {
-                "category": category,
-                "market_type": "crypto",
-                "results": results,
-                "time": datetime.now().isoformat(),
-                "source": "CoinGecko"
-            }
+            # Fallback to public API
+            url, headers, params = get_coingecko_url("coins/markets", use_pro=False)
+            
+            # Add query parameters
+            params.update({
+                "vs_currency": "usd",
+                "order": "market_cap_desc",
+                "per_page": 250,
+                "page": 1,
+                "sparkline": "false",
+                "price_change_percentage": "24h"
+            })
+            
+            # Make API request
+            success, data = await make_api_request(url, headers, params)
+            
+            if not success:
+                return data  # Error response is already formatted
+            
+            # Process markets data
+            return self._process_markets_data(data, category, limit)
+    
+    def _process_trending_coins(self, data: Dict[str, Any], limit: int) -> Dict[str, Any]:
+        """Process trending coins data from CoinGecko response."""
+        # Extract trending coins
+        trending_coins = data.get("coins", [])
+        
+        # Format results
+        results = []
+        for i, coin_data in enumerate(trending_coins[:limit]):
+            coin = coin_data.get("item", {})
+            results.append({
+                "rank": i + 1,
+                "symbol": coin.get("symbol", "").upper(),
+                "name": coin.get("name", "Unknown"),
+                "market_cap_rank": coin.get("market_cap_rank"),
+                "price_btc": coin.get("price_btc"),
+                "id": coin.get("id")
+            })
+        
+        return {
+            "category": "trending",
+            "market_type": "crypto",
+            "results": results,
+            "time": datetime.now().isoformat(),
+            "source": "CoinGecko"
+        }
+    
+    def _process_markets_data(self, data: List[Dict[str, Any]], category: str, limit: int) -> Dict[str, Any]:
+        """Process market data for gainers/losers from CoinGecko response."""
+        # Sort by price change percentage
+        if category == "gainers":
+            sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0), reverse=True)
+        else:  # losers
+            sorted_data = sorted(data, key=lambda x: x.get("price_change_percentage_24h", 0))
+        
+        # Format results
+        results = []
+        for i, coin in enumerate(sorted_data[:limit]):
+            results.append({
+                "rank": i + 1,
+                "symbol": coin.get("symbol", "").upper(),
+                "name": coin.get("name", "Unknown"),
+                "price_usd": coin.get("current_price"),
+                "price_change_24h": coin.get("price_change_24h"),
+                "price_change_percentage_24h": coin.get("price_change_percentage_24h"),
+                "market_cap": coin.get("market_cap"),
+                "volume_24h": coin.get("total_volume")
+            })
+        
+        return {
+            "category": category,
+            "market_type": "crypto",
+            "results": results,
+            "time": datetime.now().isoformat(),
+            "source": "CoinGecko"
+        }
     
     async def _get_stock_trends(self, category: str, limit: int) -> Dict[str, Any]:
         """
@@ -188,7 +239,7 @@ class MarketTrendsTool(BaseTool):
         # Make API request
         url = "https://www.alphavantage.co/query"
         params = {"function": function, "apikey": self.alphavantage_api_key}
-        success, data = await make_api_request(url, params=params)
+        success, data = await make_api_request(url, {}, params)
         
         if not success:
             return data  # Error response is already formatted

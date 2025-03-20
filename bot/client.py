@@ -8,9 +8,10 @@ from discord import app_commands
 from discord.ext import commands, tasks
 import logging
 import asyncio
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from datetime import datetime
 import os
+import re
 
 # Fix imports by using the "sys.path" approach
 import sys
@@ -44,6 +45,9 @@ class TradeMasterClient(commands.Bot):
         self.context_manager = ContextManager()
         self.llm_engine = LLMEngine()
         
+        # Discord message limit (characters)
+        self.discord_message_limit = 2000
+        
         logger.info("TradeMaster client initialized")
     
     async def setup_hook(self):
@@ -70,6 +74,64 @@ class TradeMasterClient(commands.Bot):
         
         # Start background tasks
         self.cleanup_contexts.start()
+    
+    def _split_message(self, message: str) -> List[str]:
+        """
+        Split a long message into multiple messages that fit within Discord's character limit.
+        
+        Args:
+            message: The message to split
+            
+        Returns:
+            A list of message parts
+        """
+        # If message is already within the limit, return it as is
+        if len(message) <= self.discord_message_limit:
+            return [message]
+        
+        # Split message into parts
+        parts = []
+        
+        # Try to split by paragraphs first
+        paragraphs = message.split('\n\n')
+        current_part = ""
+        
+        for paragraph in paragraphs:
+            # If adding this paragraph would exceed the limit, start a new part
+            if len(current_part) + len(paragraph) + 2 > self.discord_message_limit:
+                # If current_part is not empty, add it to parts
+                if current_part:
+                    parts.append(current_part)
+                
+                # Check if paragraph itself is too long
+                if len(paragraph) > self.discord_message_limit:
+                    # Split paragraph by sentences
+                    sentences = re.split(r'(?<=[.!?])\s+', paragraph)
+                    current_part = ""
+                    
+                    for sentence in sentences:
+                        if len(current_part) + len(sentence) + 1 > self.discord_message_limit:
+                            parts.append(current_part)
+                            current_part = sentence
+                        else:
+                            if current_part:
+                                current_part += " " + sentence
+                            else:
+                                current_part = sentence
+                else:
+                    current_part = paragraph
+            else:
+                # Add paragraph to current part
+                if current_part:
+                    current_part += "\n\n" + paragraph
+                else:
+                    current_part = paragraph
+        
+        # Add the last part if it's not empty
+        if current_part:
+            parts.append(current_part)
+        
+        return parts
     
     async def on_message(self, message):
         """Handle incoming messages."""
@@ -118,9 +180,17 @@ class TradeMasterClient(commands.Bot):
                 # Update context with bot's response
                 self.context_manager.add_bot_response(user_id, response)
                 
-                # Reply to the message
-                await message.reply(response)
-                logger.info(f"Responded to message from {message.author.name}: {message.content[:50]}...")
+                # Split response if it's too long
+                message_parts = self._split_message(response)
+                
+                # Send the first part as a reply
+                await message.reply(message_parts[0])
+                
+                # Send any additional parts as follow-up messages
+                for part in message_parts[1:]:
+                    await message.channel.send(part)
+                
+                logger.info(f"Responded to message from {message.author.name}: {message.content[:50]}... (in {len(message_parts)} parts)")
         
         except Exception as e:
             logger.error(f"Error processing message: {e}")

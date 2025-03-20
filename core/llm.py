@@ -2,15 +2,20 @@
 
 This module implements the core language model engine for the TradeMaster trading assistant.
 It provides integration with Groq LLM API to generate responses to user queries about
-trading, markets, and financial concepts.
+trading, markets, and financial concepts, with the ability to use specialized tools
+for real-time market data.
 """
 
 import logging
 import os
 import json
+import re
 import aiohttp
 import random
 from typing import Optional, Dict, Any, List, Tuple
+
+# Import tool registry and loader
+from tools import registry, load_tools
 
 logger = logging.getLogger("TradeMaster.LLM")
 
@@ -25,7 +30,8 @@ class LLMEngine:
     1. Integration with Groq LLM API
     2. Conversation history management
     3. Trading assistant persona with market knowledge
-    4. Fallback mechanisms for API failures
+    4. Tool integration for real-time market data
+    5. Fallback mechanisms for API failures
     """
     
     def __init__(self):
@@ -38,6 +44,9 @@ class LLMEngine:
         
         # Initialize fallback responses for when API calls fail
         self._init_fallback_responses()
+        
+        # Load tools
+        self.tool_names = load_tools()
         
         # Log initialization with available APIs
         self._log_initialization()
@@ -61,6 +70,10 @@ class LLMEngine:
         4. Market structure and mechanics across different asset classes
         5. Trading strategies and their implementation
         
+        IMPORTANT: Never provide outdated price or market data. You have access to tools that can 
+        fetch current market information. Always use these tools when users ask about current prices, 
+        market trends, or other time-sensitive financial data.
+        
         When responding to queries:
         - Provide educational content that helps users understand concepts, not just answers
         - Be clear about the limitations of your knowledge and avoid making specific price predictions
@@ -68,8 +81,9 @@ class LLMEngine:
         - Adapt your explanations to the user's apparent level of expertise
         - Use precise terminology and explain jargon when necessary
         
-        You have access to tools that can provide real-time market data and analysis.
-        When appropriate, suggest using these tools to enhance your responses with current information.
+        If a user asks about current prices, market trends, or other real-time financial data,
+        ALWAYS use the appropriate tool to fetch this information instead of relying on your
+        training data which may be outdated.
         """.strip()
     
     def _init_fallback_responses(self):
@@ -90,6 +104,96 @@ class LLMEngine:
             logger.info(f"LLM Engine initialized with Groq API ({self.groq_model})")
         else:
             logger.warning("LLM Engine initialized without Groq API key. Will use fallback responses only.")
+        
+        if self.tool_names:
+            logger.info(f"Loaded tools: {', '.join(self.tool_names)}")
+    
+    async def _detect_tool_usage(self, message: str) -> Tuple[bool, Optional[Dict[str, Any]]]:
+        """Determine if a tool should be used based on message content and which tool.
+        
+        Args:
+            message: The user's message text
+            
+        Returns:
+            Tuple of (should_use_tool, tool_params) where tool_params includes:
+            - tool_name: The name of the tool to use
+            - params: Parameters to pass to the tool
+        """
+        # Check for price inquiries
+        price_patterns = [
+            r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:current |latest |present |real-time |live )?(?:price|value|worth|rate) (?:of |for )?([a-zA-Z0-9]+)",
+            r"how much (?:is|does) ([a-zA-Z0-9]+) (?:cost|worth|trading for|trading at|going for)",
+            r"([a-zA-Z0-9]+) price",
+        ]
+        
+        for pattern in price_patterns:
+            match = re.search(pattern, message.lower())
+            if match:
+                symbol = match.group(1).upper()
+                return True, {
+                    "tool_name": "price_checker",
+                    "params": {
+                        "symbol": symbol
+                    }
+                }
+        
+        # Check for market trend inquiries
+        trend_patterns = [
+            r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:top|best|leading|biggest) (?:gainers|performers|movers) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
+            r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:top|worst|biggest) (?:losers|declining|falling) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
+            r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:trending|hot|popular) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
+        ]
+        
+        for pattern in trend_patterns:
+            match = re.search(pattern, message.lower())
+            if match:
+                market_type = match.group(1).lower()
+                # Normalize market type
+                if market_type in ["cryptocurrency", "crypto"]:
+                    market_type = "crypto"
+                elif market_type in ["stocks", "stock"]:
+                    market_type = "stock"
+                
+                # Determine category based on message
+                category = "trending"
+                if "gainers" in message.lower() or "performers" in message.lower():
+                    category = "gainers"
+                elif "losers" in message.lower() or "declining" in message.lower() or "falling" in message.lower():
+                    category = "losers"
+                
+                return True, {
+                    "tool_name": "market_trends",
+                    "params": {
+                        "market_type": market_type,
+                        "category": category,
+                        "limit": 5
+                    }
+                }
+        
+        return False, None
+    
+    async def _execute_tool(self, tool_name: str, params: Dict[str, Any]) -> Dict[str, Any]:
+        """Execute a tool with the provided parameters.
+        
+        Args:
+            tool_name: The name of the tool to execute
+            params: Parameters to pass to the tool
+            
+        Returns:
+            The tool's response
+        """
+        tool = registry.get_tool(tool_name)
+        if not tool:
+            logger.warning(f"Tool '{tool_name}' not found")
+            return {"error": f"Tool '{tool_name}' not found"}
+        
+        try:
+            logger.info(f"Executing tool '{tool_name}' with params: {params}")
+            result = await tool.execute(**params)
+            return result
+        except Exception as e:
+            logger.error(f"Error executing tool '{tool_name}': {str(e)}")
+            return {"error": f"Error executing tool: {str(e)}"}
     
     async def generate_response(self, message: str, user_id: str, context: Optional[Dict[str, Any]] = None) -> str:
         """Generate a response to a user message using Groq LLM API.
@@ -108,6 +212,15 @@ class LLMEngine:
         # Log the incoming message
         logger.info(f"Generating response for user {user_id}: {message[:50]}...")
         
+        # Check if we should use a tool
+        should_use_tool, tool_params = await self._detect_tool_usage(message)
+        
+        # If we should use a tool, execute it
+        tool_result = None
+        if should_use_tool and tool_params:
+            tool_result = await self._execute_tool(tool_params["tool_name"], tool_params["params"])
+            logger.info(f"Tool result: {json.dumps(tool_result)[:200]}...")
+        
         # Get conversation history from context if available
         conversation_history = []
         if context and 'message_history' in context:
@@ -116,7 +229,28 @@ class LLMEngine:
         # Try Groq API if available
         if self.groq_api_key:
             try:
-                response = await self._call_groq_api(message, conversation_history)
+                # If we have a tool result, include it in the prompt
+                tool_prompt = ""
+                if tool_result:
+                    # Format tool result for the LLM
+                    tool_name = tool_params["tool_name"]
+                    if "error" in tool_result:
+                        tool_prompt = f"""
+                        \nIMPORTANT: I tried to get real-time data using the {tool_name} tool, but encountered an error: {tool_result['error']}
+                        
+                        When responding to the user:
+                        1. DO NOT provide any specific price or market data numbers since I don't have current data
+                        2. Explain that you're unable to provide real-time data at the moment due to a technical issue
+                        3. Apologize for the inconvenience
+                        4. Suggest that they check a reliable financial website or exchange for current data
+                        5. DO NOT make up or estimate current prices based on your training data\n
+                        """
+                    else:
+                        tool_prompt = f"\nHere is the real-time data from the {tool_name} tool:\n{json.dumps(tool_result, indent=2)}\n"
+                        tool_prompt += "\nPlease use this real-time data in your response.\n"
+                
+                # Generate response
+                response = await self._call_groq_api(message, conversation_history, tool_prompt)
                 logger.info("Generated response using Groq API")
                 return response
             except Exception as e:
@@ -129,12 +263,13 @@ class LLMEngine:
             logger.warning("No Groq API key available, using fallback response")
             return random.choice(self.fallback_responses)
     
-    async def _call_groq_api(self, message: str, conversation_history: List[Dict[str, str]]) -> str:
+    async def _call_groq_api(self, message: str, conversation_history: List[Dict[str, str]], tool_prompt: str = "") -> str:
         """Call the Groq LLM API to generate a response.
         
         Args:
             message: The user's message
             conversation_history: List of previous messages in the conversation
+            tool_prompt: Additional prompt with tool data
             
         Returns:
             The generated response text
@@ -148,8 +283,13 @@ class LLMEngine:
             "Content-Type": "application/json"
         }
         
+        # Add tool information to system prompt if available
+        system_prompt = self.system_prompt
+        if tool_prompt:
+            system_prompt = f"{system_prompt}\n{tool_prompt}"
+        
         # Prepare messages array with system prompt and conversation history
-        messages = [{"role": "system", "content": self.system_prompt}]
+        messages = [{"role": "system", "content": system_prompt}]
         
         # Add conversation history - filter out unsupported fields like 'timestamp'
         for msg in conversation_history:
@@ -166,7 +306,7 @@ class LLMEngine:
             "model": self.groq_model,
             "messages": messages,
             "temperature": 0.7,
-            "max_tokens": 1024
+            "max_tokens": 800  # Reduced to ensure we stay under Discord's 2000 char limit
         }
         
         # Make the API call
