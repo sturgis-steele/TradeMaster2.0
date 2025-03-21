@@ -10,6 +10,7 @@ from typing import List
 from .registry import registry
 from .price_checker import PriceCheckerTool
 from .market_trends import MarketTrendsTool
+from .browser_search import BrowserSearchTool
 
 logger = logging.getLogger("TradeMaster.Tools.Loader")
 
@@ -26,6 +27,7 @@ def load_tools() -> List[str]:
     # Register tools
     registry.register_tool(PriceCheckerTool())
     registry.register_tool(MarketTrendsTool())
+    registry.register_tool(BrowserSearchTool())
     
     # Add more tools here as they are implemented
     

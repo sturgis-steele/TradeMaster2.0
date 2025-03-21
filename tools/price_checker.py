@@ -1,5 +1,4 @@
-"""
-Market Price Checker Tool for TradeMaster 2.0
+"""Market Price Checker Tool for TradeMaster 2.0
 
 This tool retrieves current price information for stocks and cryptocurrencies.
 It uses both CoinGecko for crypto prices and Alpha Vantage for stock prices,
@@ -8,18 +7,22 @@ with fallback options when primary sources fail.
 
 import logging
 import os
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from datetime import datetime
+import aiohttp
+import json
 
 from .base_tool import BaseTool
-from utils.api_utils import make_api_request, get_coingecko_url, get_alphavantage_params, format_error_response
 
 logger = logging.getLogger("TradeMaster.Tools.PriceChecker")
 
 class PriceCheckerTool(BaseTool):
-    """
-    Tool for checking current market prices of stocks and cryptocurrencies.
-    """
+    """Tool for checking current market prices of stocks and cryptocurrencies."""
+    
+    # API Base URLs
+    COINGECKO_BASE_URL = "https://api.coingecko.com/api/v3"
+    COINGECKO_PRO_BASE_URL = "https://pro-api.coingecko.com/api/v3"
+    ALPHAVANTAGE_BASE_URL = "https://www.alphavantage.co/query"
     
     @property
     def name(self) -> str:
@@ -60,308 +63,31 @@ class PriceCheckerTool(BaseTool):
         self.coingecko_api_key = os.getenv("COINGECKO_API_KEY")
         self.alphavantage_api_key = os.getenv("ALPHA_VANTAGE_API_KEY")
         
-        # Common stock symbols for auto-detection
+        # Market type detection data
         self.common_stocks = {
             "AAPL", "MSFT", "GOOGL", "AMZN", "META", "TSLA", "NVDA", "JPM",
             "V", "JNJ", "WMT", "PG", "MA", "UNH", "HD", "BAC", "XOM", "DIS",
             "PYPL", "INTC", "CMCSA", "NFLX", "CSCO", "ADBE", "CRM", "VZ"
         }
         
-        # Common crypto symbols for auto-detection
         self.common_cryptos = {
             "BTC", "ETH", "BNB", "XRP", "SOL", "ADA", "AVAX", "DOT", "DOGE",
             "MATIC", "LINK", "UNI", "LTC", "BCH", "ATOM", "XLM", "ALGO", "NEAR"
         }
         
-        # CoinGecko ID mapping
         self.coingecko_ids = {
-            "BTC": "bitcoin",
-            "ETH": "ethereum",
-            "BNB": "binancecoin",
-            "SOL": "solana",
-            "XRP": "ripple",
-            "ADA": "cardano",
-            "AVAX": "avalanche-2",
-            "DOT": "polkadot",
-            "DOGE": "dogecoin",
-            "MATIC": "matic-network",
-            "LINK": "chainlink",
-            "UNI": "uniswap",
-            "LTC": "litecoin",
-            "BCH": "bitcoin-cash",
-            "ATOM": "cosmos",
-            "XLM": "stellar",
-            "ALGO": "algorand",
-            "NEAR": "near"
+            "BTC": "bitcoin", "ETH": "ethereum", "BNB": "binancecoin",
+            "SOL": "solana", "XRP": "ripple", "ADA": "cardano",
+            "AVAX": "avalanche-2", "DOT": "polkadot", "DOGE": "dogecoin",
+            "MATIC": "matic-network", "LINK": "chainlink", "UNI": "uniswap",
+            "LTC": "litecoin", "BCH": "bitcoin-cash", "ATOM": "cosmos",
+            "XLM": "stellar", "ALGO": "algorand", "NEAR": "near"
         }
         
         logger.info("PriceChecker tool initialized")
     
-    def _detect_market_type(self, symbol: str) -> str:
-        """
-        Auto-detect whether a symbol is for crypto or stock.
-        
-        Args:
-            symbol: The symbol to check
-            
-        Returns:
-            Either 'crypto' or 'stock'
-        """
-        symbol_upper = symbol.upper()
-        
-        # Check common lists first
-        if symbol_upper in self.common_cryptos:
-            return "crypto"
-        if symbol_upper in self.common_stocks:
-            return "stock"
-        
-        # If not in common lists, use heuristics
-        # Crypto symbols tend to be 3-4 letters
-        # Stocks can be 1-5 letters and often all caps
-        if len(symbol) <= 4 and symbol.isalpha():
-            return "crypto"
-        else:
-            return "stock"
-    
-    async def _get_crypto_price_simple(self, symbol: str) -> Dict[str, Any]:
-        """
-        Get cryptocurrency price using the simple price endpoint.
-        This is an alternative that might work better with the Pro API.
-        
-        Args:
-            symbol: The crypto symbol (e.g., BTC, ETH)
-            
-        Returns:
-            Dictionary with price information
-        """
-        symbol_upper = symbol.upper()
-        
-        # Convert symbol to CoinGecko ID if known
-        coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
-        
-        # Try Pro API first if key available
-        if self.coingecko_api_key:
-            # Use the simple/price endpoint instead
-            url, headers, params = get_coingecko_url("simple/price", use_pro=True)
-            
-            # Add required parameters
-            params.update({
-                "ids": coin_id,
-                "vs_currencies": "usd",
-                "include_market_cap": "true",
-                "include_24hr_vol": "true",
-                "include_24hr_change": "true",
-                "include_last_updated_at": "true"
-            })
-            
-            # Make API request
-            success, data = await make_api_request(url, headers, params)
-            
-            if success and coin_id in data:
-                # Format the response
-                coin_data = data[coin_id]
-                return {
-                    "symbol": symbol_upper,
-                    "name": self.coingecko_ids.get(symbol_upper, coin_id).capitalize(),
-                    "price_usd": coin_data.get("usd"),
-                    "price_change_24h": coin_data.get("usd_24h_change"),
-                    "market_cap": coin_data.get("usd_market_cap"),
-                    "volume_24h": coin_data.get("usd_24h_vol"),
-                    "time": datetime.now().isoformat(),
-                    "source": "CoinGecko Pro API"
-                }
-            
-            logger.warning(f"CoinGecko Pro API simple/price failed, trying public API: {data.get('error', 'Unknown error')}")
-        
-        # Fall back to public API
-        url, headers, params = get_coingecko_url("simple/price", use_pro=False)
-        
-        # Add parameters
-        params.update({
-            "ids": coin_id,
-            "vs_currencies": "usd",
-            "include_market_cap": "true",
-            "include_24hr_vol": "true",
-            "include_24hr_change": "true",
-            "include_last_updated_at": "true"
-        })
-        
-        # Make API request
-        success, data = await make_api_request(url, headers, params)
-        
-        if not success:
-            return data  # Error response
-        
-        if coin_id not in data:
-            return format_error_response(symbol, f"No data found for {coin_id}")
-        
-        # Format the response
-        coin_data = data[coin_id]
-        return {
-            "symbol": symbol_upper,
-            "name": self.coingecko_ids.get(symbol_upper, coin_id).capitalize(),
-            "price_usd": coin_data.get("usd"),
-            "price_change_24h": coin_data.get("usd_24h_change"),
-            "market_cap": coin_data.get("usd_market_cap"),
-            "volume_24h": coin_data.get("usd_24h_vol"),
-            "time": datetime.now().isoformat(),
-            "source": "CoinGecko Public API"
-        }
-    
-    async def _get_crypto_price(self, symbol: str) -> Dict[str, Any]:
-        """
-        Get cryptocurrency price from CoinGecko with fallback.
-        
-        Args:
-            symbol: The crypto symbol (e.g., BTC, ETH)
-            
-        Returns:
-            Dictionary with price information
-        """
-        # Try the simple endpoint first
-        result = await self._get_crypto_price_simple(symbol)
-        
-        # If successful, return the result
-        if "error" not in result:
-            return result
-        
-        # Otherwise try the detailed endpoint
-        symbol_upper = symbol.upper()
-        
-        # Convert symbol to CoinGecko ID if known
-        coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
-        
-        # First try using Pro API if key available
-        if self.coingecko_api_key:
-            # Get appropriate URL, headers, and params for Pro API
-            url, headers, params = get_coingecko_url(f"coins/{coin_id}", use_pro=True)
-            
-            # For detailed coin info, include these parameters
-            params["localization"] = "false"
-            params["tickers"] = "false"
-            params["market_data"] = "true"
-            params["community_data"] = "false"
-            params["developer_data"] = "false"
-            
-            # Make API request
-            success, data = await make_api_request(url, headers, params)
-            
-            # If successful, process the data
-            if success:
-                return self._process_coingecko_data(data, symbol_upper, "CoinGecko Pro API")
-            
-            # Log the error but continue to fallback
-            logger.warning(f"CoinGecko Pro API failed for coins/{coin_id}, trying public API: {data.get('error', 'Unknown error')}")
-        
-        # Fallback to public CoinGecko API (no API key required)
-        url, headers, params = get_coingecko_url(f"coins/{coin_id}", use_pro=False)
-        
-        # For detailed coin info, include these parameters
-        params["localization"] = "false"
-        params["tickers"] = "false"
-        params["market_data"] = "true"
-        params["community_data"] = "false"
-        params["developer_data"] = "false"
-        
-        # Make API request
-        success, data = await make_api_request(url, headers, params)
-        
-        if not success:
-            logger.error(f"Both CoinGecko APIs failed for {symbol}: {data.get('error', 'Unknown error')}")
-            return data  # Return error response
-        
-        # Process the data
-        return self._process_coingecko_data(data, symbol_upper, "CoinGecko Public API")
-    
-    def _process_coingecko_data(self, data: Dict[str, Any], symbol: str, source: str = "CoinGecko") -> Dict[str, Any]:
-        """
-        Process CoinGecko response data into a standardized format.
-        
-        Args:
-            data: Raw response data from CoinGecko
-            symbol: The crypto symbol
-            source: The source of the data (e.g., "CoinGecko Pro API")
-            
-        Returns:
-            Dictionary with processed price information
-        """
-        # Extract relevant information
-        price_usd = data.get("market_data", {}).get("current_price", {}).get("usd")
-        price_change_24h = data.get("market_data", {}).get("price_change_percentage_24h")
-        market_cap = data.get("market_data", {}).get("market_cap", {}).get("usd")
-        volume_24h = data.get("market_data", {}).get("total_volume", {}).get("usd")
-        
-        return {
-            "symbol": symbol,
-            "name": data.get("name", "Unknown"),
-            "price_usd": price_usd,
-            "price_change_24h": price_change_24h,
-            "market_cap": market_cap,
-            "volume_24h": volume_24h,
-            "time": datetime.now().isoformat(),
-            "source": source
-        }
-    
-    async def _get_stock_price(self, symbol: str) -> Dict[str, Any]:
-        """
-        Get stock price from Alpha Vantage.
-        
-        Args:
-            symbol: The stock symbol (e.g., AAPL, MSFT)
-            
-        Returns:
-            Dictionary with price information
-        """
-        if not self.alphavantage_api_key:
-            logger.error("Alpha Vantage API key not found")
-            return format_error_response(symbol, "Alpha Vantage API key not configured")
-        
-        symbol_upper = symbol.upper()
-        
-        # Get parameters for Alpha Vantage API
-        params = get_alphavantage_params("GLOBAL_QUOTE", symbol_upper)
-        
-        # Make API request
-        success, data = await make_api_request("https://www.alphavantage.co/query", {}, params)
-        
-        if not success:
-            return data  # Error response is already formatted
-        
-        # Check for API errors or empty responses
-        if "Error Message" in data:
-            return format_error_response(symbol, data["Error Message"])
-        
-        if "Global Quote" not in data or not data["Global Quote"]:
-            return format_error_response(symbol, f"No data found for stock symbol {symbol}")
-        
-        quote = data["Global Quote"]
-        
-        # Extract relevant information
-        price = float(quote.get("05. price", 0))
-        change_percent = quote.get("10. change percent", "0%").replace("%", "")
-        
-        return {
-            "symbol": symbol_upper,
-            "price_usd": price,
-            "price_change": float(quote.get("09. change", 0)),
-            "price_change_percent": float(change_percent),
-            "volume": int(float(quote.get("06. volume", 0))),
-            "latest_trading_day": quote.get("07. latest trading day", ""),
-            "time": datetime.now().isoformat(),
-            "source": "Alpha Vantage"
-        }
-    
     async def execute(self, **kwargs) -> Dict[str, Any]:
-        """
-        Execute the price checker tool.
-        
-        Args:
-            symbol: The symbol to check
-            market_type: The market type ('crypto', 'stock', or 'auto')
-            
-        Returns:
-            Dictionary with price information
-        """
+        """Execute the price checker tool."""
         symbol = kwargs.get("symbol")
         if not symbol:
             return {"error": "Symbol parameter is required"}
@@ -381,3 +107,193 @@ class PriceCheckerTool(BaseTool):
             return await self._get_stock_price(symbol)
         else:
             return {"error": f"Invalid market type: {market_type}. Use 'crypto' or 'stock'"}
+    
+    def _detect_market_type(self, symbol: str) -> str:
+        """Auto-detect whether a symbol is for crypto or stock."""
+        symbol_upper = symbol.upper()
+        
+        # Check common lists first
+        if symbol_upper in self.common_cryptos:
+            return "crypto"
+        if symbol_upper in self.common_stocks:
+            return "stock"
+        
+        # If not in common lists, use heuristics
+        return "crypto" if len(symbol) <= 4 and symbol.isalpha() else "stock"
+    
+    async def make_api_request(self, url: str, headers: Dict[str, str] = None, 
+                             params: Dict[str, Any] = None) -> Tuple[bool, Dict[str, Any]]:
+        """Make an API request and handle common error cases."""
+        headers = headers or {}
+        params = params or {}
+        
+        try:
+            logger.info(f"Making API request to: {url}")
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, headers=headers, params=params) as response:
+                    response_text = await response.text()
+                    
+                    if response.status != 200:
+                        error_message = f"Status {response.status}"
+                        try:
+                            error_data = json.loads(response_text)
+                            if isinstance(error_data, dict):
+                                for field in ['message', 'error', 'error_message', 'status', 'detail']:
+                                    if field in error_data:
+                                        error_message = f"{error_message}: {error_data[field]}"
+                                        break
+                        except:
+                            error_message = f"API request failed with status {response.status}"
+                        
+                        return False, {"error": error_message, "status": response.status}
+                    
+                    try:
+                        data = json.loads(response_text)
+                        return True, data
+                    except Exception as e:
+                        logger.error(f"Error parsing JSON response: {e}")
+                        return False, {"error": f"Error parsing response: {str(e)}"}
+        
+        except aiohttp.ClientError as e:
+            logger.error(f"API connection error: {e} - {url}")
+            return False, {"error": f"Connection error: {str(e)}"}
+        except Exception as e:
+            logger.error(f"Unexpected error in API request: {e} - {url}")
+            return False, {"error": f"Unexpected error: {str(e)}"}
+    
+    def format_error_response(self, symbol: str, error_msg: str) -> Dict[str, Any]:
+        """Format a standardized error response."""
+        return {
+            "error": f"Failed to get data for {symbol}: {error_msg}",
+            "symbol": symbol,
+            "success": False
+        }
+    
+    async def _get_crypto_price(self, symbol: str) -> Dict[str, Any]:
+        """Get cryptocurrency price from CoinGecko with fallback."""
+        symbol_upper = symbol.upper()
+        coin_id = self.coingecko_ids.get(symbol_upper, symbol.lower())
+        
+        # Try simple price endpoint first
+        result = await self._try_crypto_endpoint("simple/price", coin_id, symbol_upper)
+        if "error" not in result:
+            return result
+            
+        # Fall back to detailed endpoint
+        return await self._try_crypto_endpoint(f"coins/{coin_id}", coin_id, symbol_upper, detailed=True)
+    
+    async def _try_crypto_endpoint(self, endpoint: str, coin_id: str, symbol: str, detailed: bool = False) -> Dict[str, Any]:
+        """Try a CoinGecko endpoint with Pro API first, then fall back to public API."""
+        # Try Pro API first if key available
+        if self.coingecko_api_key:
+            result = await self._make_coingecko_request(endpoint, coin_id, symbol, True, detailed)
+            if "error" not in result:
+                return result
+        
+        # Fall back to public API
+        return await self._make_coingecko_request(endpoint, coin_id, symbol, False, detailed)
+    
+    def get_coingecko_url(self, endpoint: str, use_pro: bool = True) -> Tuple[str, Dict[str, str], Dict[str, Any]]:
+        """Get the appropriate CoinGecko URL, headers, and params."""
+        api_key = self.coingecko_api_key
+        params = {}
+        
+        # Ensure no leading slash in endpoint
+        if endpoint.startswith('/'):
+            endpoint = endpoint[1:]
+        
+        if api_key and use_pro:
+            base_url = self.COINGECKO_PRO_BASE_URL
+            # For Pro API, the key should be in the x-cg-pro-api-key header
+            headers = {"x-cg-pro-api-key": api_key}
+            logger.info(f"Using CoinGecko Pro API for endpoint: {endpoint}")
+            logger.info(f"API Key (partial): {self.sanitize_api_key(api_key)}")
+        else:
+            base_url = self.COINGECKO_BASE_URL
+            headers = {}
+            logger.info(f"Using CoinGecko Public API for endpoint: {endpoint}")
+        
+        return f"{base_url}/{endpoint}", headers, params
+    
+    def _process_simple_coingecko_data(self, coin_data: Dict[str, Any], symbol: str, 
+                                     coin_id: str, source: str) -> Dict[str, Any]:
+        """Process data from CoinGecko simple/price endpoint."""
+        return {
+            "symbol": symbol,
+            "name": self.coingecko_ids.get(symbol, coin_id).capitalize(),
+            "price_usd": coin_data.get("usd"),
+            "price_change_24h": coin_data.get("usd_24h_change"),
+            "market_cap": coin_data.get("usd_market_cap"),
+            "volume_24h": coin_data.get("usd_24h_vol"),
+            "time": datetime.now().isoformat(),
+            "source": source
+        }
+    
+    def _process_detailed_coingecko_data(self, data: Dict[str, Any], symbol: str, source: str) -> Dict[str, Any]:
+        """Process data from CoinGecko coins/{id} endpoint."""
+        market_data = data.get("market_data", {})
+        return {
+            "symbol": symbol,
+            "name": data.get("name", "Unknown"),
+            "price_usd": market_data.get("current_price", {}).get("usd"),
+            "price_change_24h": market_data.get("price_change_percentage_24h"),
+            "market_cap": market_data.get("market_cap", {}).get("usd"),
+            "volume_24h": market_data.get("total_volume", {}).get("usd"),
+            "time": datetime.now().isoformat(),
+            "source": source
+        }
+    
+    async def _get_stock_price(self, symbol: str) -> Dict[str, Any]:
+        """Get stock price from Alpha Vantage."""
+        if not self.alphavantage_api_key:
+            return self.format_error_response(symbol, "Alpha Vantage API key not configured")
+        
+        symbol_upper = symbol.upper()
+        
+        # Use Global Quote endpoint to get current price data
+        url = self.ALPHAVANTAGE_BASE_URL
+        params = {
+            "function": "GLOBAL_QUOTE",
+            "symbol": symbol_upper,
+            "apikey": self.alphavantage_api_key
+        }
+        
+        logger.info(f"Getting stock price for {symbol_upper} from Alpha Vantage")
+        success, data = await self.make_api_request(url, {}, params)
+        
+        if not success:
+            return data  # Return error response
+        
+        # Check for API errors or empty responses
+        if "Error Message" in data:
+            return self.format_error_response(symbol_upper, data["Error Message"])
+        
+        # Extract the quote data
+        quote_data = data.get("Global Quote", {})
+        if not quote_data:
+            return self.format_error_response(symbol_upper, "No data found")
+        
+        # Process the data
+        try:
+            price = float(quote_data.get("05. price", 0))
+            change = float(quote_data.get("09. change", 0))
+            change_percent = float(quote_data.get("10. change percent", "0%").replace("%", ""))
+            volume = int(quote_data.get("06. volume", 0))
+            
+            return {
+                "symbol": symbol_upper,
+                "name": symbol_upper,  # Alpha Vantage doesn't provide company name in this endpoint
+                "price_usd": price,
+                "price_change_24h": change_percent,
+                "change_amount": change,
+                "volume_24h": volume,
+                "time": datetime.now().isoformat(),
+                "source": "Alpha Vantage"
+            }
+        except (ValueError, TypeError) as e:
+            logger.error(f"Error processing Alpha Vantage data: {e}")
+            return self.format_error_response(symbol_upper, f"Error processing data: {str(e)}")
+        
+        # If we get here, something unexpected happened
+        return self.format_error_response(symbol_upper, "Failed to retrieve stock price data")

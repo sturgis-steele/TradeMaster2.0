@@ -15,13 +15,27 @@ class ToolRegistry:
     """
     Registry for TradeMaster tools.
     
-    This class manages the registration and retrieval of tools,
-    ensuring that tool names are unique and providing a central
-    access point for available tools.
+    This class implements the registry pattern to manage all available tools in the
+    TradeMaster system. It provides methods to register new tools, retrieve tools
+    by name, list all available tools, and clear the registry.
+    
+    The registry ensures that:
+    1. Each tool has a unique name to prevent conflicts
+    2. Tools can be easily accessed by their name
+    3. The system can discover all available tools
+    4. Tools can be dynamically added or removed
+    
+    This centralized approach simplifies tool management and allows the LLM engine
+    to access tools without needing to know how they're instantiated.
     """
     
     def __init__(self):
-        """Initialize an empty tool registry."""
+        """
+        Initialize an empty tool registry.
+        
+        Creates a new registry with an empty dictionary to store tool instances,
+        where the keys are tool names and the values are tool instances.
+        """
         self._tools: Dict[str, BaseTool] = {}
         logger.info("Tool Registry initialized")
     
@@ -29,8 +43,12 @@ class ToolRegistry:
         """
         Register a tool with the registry.
         
+        This method adds a tool instance to the registry, making it available for use
+        by the LLM engine. It ensures that tool names are unique to prevent conflicts
+        and maintains a centralized collection of all available tools.
+        
         Args:
-            tool: An instance of BaseTool to register
+            tool: An instance of BaseTool to register. Must have a unique name.
             
         Raises:
             ValueError: If a tool with the same name is already registered
@@ -45,17 +63,27 @@ class ToolRegistry:
         """
         Get a tool by name.
         
+        Retrieves a tool instance from the registry by its name. This is the primary
+        method used by the LLM engine to access tools when they need to be executed.
+        It provides a simple lookup mechanism that abstracts away the details of
+        how tools are stored and managed.
+        
         Args:
             name: The name of the tool to retrieve
             
         Returns:
-            The tool instance or None if not found
+            The tool instance if found, or None if no tool with the given name exists
         """
         return self._tools.get(name)
     
     def list_tools(self) -> List[BaseTool]:
         """
         Get a list of all registered tools.
+        
+        This method provides access to all available tools in the system, which is
+        useful for discovery, introspection, and debugging purposes. It allows
+        the system to enumerate all available capabilities without needing to
+        know their names in advance.
         
         Returns:
             A list of all registered tool instances

@@ -70,9 +70,17 @@ class LLMEngine:
         4. Market structure and mechanics across different asset classes
         5. Trading strategies and their implementation
         
-        IMPORTANT: Never provide outdated price or market data. You have access to tools that can 
-        fetch current market information. Always use these tools when users ask about current prices, 
-        market trends, or other time-sensitive financial data.
+        IMPORTANT: NEVER provide outdated price or market data from your training. You MUST use the available tools
+        to fetch current market information. ALWAYS use the price_checker tool when users ask about current prices,
+        values, or rates of any cryptocurrency or stock. ALWAYS use the market_trends tool when users ask about
+        market trends, top gainers, losers, or other time-sensitive financial data.
+        
+        When a user asks about ANY price, volume, market cap, or other numerical market data, you MUST use
+        the appropriate tool instead of relying on your training data which is outdated.
+        
+        CRITICAL: When a user asks about top gainers, top losers, or trending assets in ANY way (such as "what are the top gainers",
+        "which coins are performing best today", etc.), you MUST ALWAYS use the market_trends tool to get real-time data.
+        NEVER respond with outdated information from your training data about which assets are up or down by specific percentages.
         
         When responding to queries:
         - Provide educational content that helps users understand concepts, not just answers
@@ -124,6 +132,10 @@ class LLMEngine:
             r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:current |latest |present |real-time |live )?(?:price|value|worth|rate) (?:of |for )?([a-zA-Z0-9]+)",
             r"how much (?:is|does) ([a-zA-Z0-9]+) (?:cost|worth|trading for|trading at|going for)",
             r"([a-zA-Z0-9]+) price",
+            r"price (?:of|for) ([a-zA-Z0-9]+)",
+            r"([a-zA-Z0-9]+) (?:is trading at|costs|is worth)",
+            r"(?:check|lookup|find|get) ([a-zA-Z0-9]+) (?:price|value|rate)",
+            r"(?:what is|what's) ([a-zA-Z0-9]+) (?:doing|at|trading at)"
         ]
         
         for pattern in price_patterns:
@@ -139,15 +151,22 @@ class LLMEngine:
         
         # Check for market trend inquiries
         trend_patterns = [
+            # Original patterns with market type specified
             r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:top|best|leading|biggest) (?:gainers|performers|movers) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
             r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:top|worst|biggest) (?:losers|declining|falling) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
             r"(?:what'?s|what is|tell me|show|get) (?:the )?(?:trending|hot|popular) (?:in|on) (?:the )?(crypto|stock|cryptocurrency|stocks)",
+            
+            # Additional patterns without explicit market type
+            r"(?:what are|what're|which are|list|show me) (?:the )?(?:top|best|leading|biggest) (?:gainers|performers|movers)(?: today| right now| currently)?(?: in| on)? (?:the )?(crypto|stock|cryptocurrency|stocks)?",
+            r"(?:what are|what're|which are|list|show me) (?:the )?(?:top|worst|biggest) (?:losers|declining|falling)(?: today| right now| currently)?(?: in| on)? (?:the )?(crypto|stock|cryptocurrency|stocks)?",
+            r"(?:what are|what're|which are|list|show me) (?:the )?(?:trending|hot|popular)(?: today| right now| currently)?(?: in| on)? (?:the )?(crypto|stock|cryptocurrency|stocks)?",
         ]
         
         for pattern in trend_patterns:
             match = re.search(pattern, message.lower())
             if match:
-                market_type = match.group(1).lower()
+                # Handle case where market type might not be specified
+                market_type = match.group(1).lower() if match.group(1) else "crypto"  # Default to crypto if not specified
                 # Normalize market type
                 if market_type in ["cryptocurrency", "crypto"]:
                     market_type = "crypto"
@@ -190,9 +209,58 @@ class LLMEngine:
         try:
             logger.info(f"Executing tool '{tool_name}' with params: {params}")
             result = await tool.execute(**params)
+            
+            # Check if this is a market data tool that failed
+            if (tool_name in ["price_checker", "market_trends"] and 
+                ("error" in result or not result)):
+                # Log the failure and attempt web search fallback
+                logger.warning(f"{tool_name} failed, falling back to web search")
+                
+                # Construct an appropriate search query based on the original tool and params
+                search_query = self._construct_fallback_query(tool_name, params)
+                
+                # Execute browser search as fallback
+                browser_tool = registry.get_tool("browser_search")
+                if browser_tool:
+                    logger.info(f"Executing browser_search fallback with query: {search_query}")
+                    try:
+                        fallback_result = await browser_tool.execute(query=search_query)
+                        
+                        # Add note that this is fallback data
+                        if not "error" in fallback_result:
+                            fallback_result["fallback"] = True
+                            fallback_result["original_tool"] = tool_name
+                            return fallback_result
+                    except Exception as e:
+                        logger.error(f"Browser search fallback also failed: {str(e)}")
+            
             return result
         except Exception as e:
             logger.error(f"Error executing tool '{tool_name}': {str(e)}")
+            
+            # If this is a market data tool that failed with an exception, try web search
+            if tool_name in ["price_checker", "market_trends"]:
+                # Log the failure and attempt web search fallback
+                logger.warning(f"{tool_name} failed with exception, falling back to web search")
+                
+                # Construct an appropriate search query based on the original tool and params
+                search_query = self._construct_fallback_query(tool_name, params)
+                
+                # Execute browser search as fallback
+                browser_tool = registry.get_tool("browser_search")
+                if browser_tool:
+                    logger.info(f"Executing browser_search fallback with query: {search_query}")
+                    try:
+                        fallback_result = await browser_tool.execute(query=search_query)
+                        
+                        # Add note that this is fallback data
+                        if not "error" in fallback_result:
+                            fallback_result["fallback"] = True
+                            fallback_result["original_tool"] = tool_name
+                            return fallback_result
+                    except Exception as e:
+                        logger.error(f"Browser search fallback also failed: {str(e)}")
+            
             return {"error": f"Error executing tool: {str(e)}"}
     
     async def generate_response(self, message: str, user_id: str, context: Optional[Dict[str, Any]] = None) -> str:

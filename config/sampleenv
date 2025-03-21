@@ -7,8 +7,9 @@ WEB_OPERATOR_PATH=./open-operator  # Path to Open Operator installation# Discord
 DISCORD_TOKEN=
 
 # LLM API Configuration (Required for AI functionality)
-GROQ_API_KEY=
+GROQ_API_KEY=  # Required for AI functionality and browser-use tool
 GROQ_MODEL=llama3-70b-8192  # Options: llama3-70b-8192, llama3-8b-8192, mixtral-8x7b-32768, etc.
+# OPENAI_API_KEY is no longer required as browser-use tool now uses Groq
 
 # LLM Configuration
 # No fallback API is configured - system will use predefined responses if Groq is unavailable
