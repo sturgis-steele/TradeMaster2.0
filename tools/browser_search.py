@@ -113,6 +113,47 @@ class BrowserSearchTool(BaseTool):
                 "success": False
             }
         
+        # Check if Playwright browsers are installed
+        try:
+            import playwright.async_api
+            # Try to create a simple browser context to check if browsers are installed
+            # Use async context manager for async API
+            try:
+                # Create a coroutine to check if browsers are installed
+                async def check_browser_installation():
+                    async with playwright.async_api.async_playwright() as p:
+                        try:
+                            browser = await p.chromium.launch(headless=True)
+                            await browser.close()
+                            return True
+                        except Exception as e:
+                            error_msg = str(e)
+                            if "Executable doesn't exist" in error_msg or "Please run the following command to download new browsers" in error_msg:
+                                logger.error("Playwright browsers are not installed")
+                                return False
+                            else:
+                                # Some other error with launching the browser
+                                logger.error(f"Error launching Playwright browser: {e}")
+                                return False
+                
+                # Run the coroutine to check browser installation
+                if not await check_browser_installation():
+                    return {
+                        "error": "Failed to get data for browser_search: Playwright browsers are not installed. Please run 'playwright install' or 'python -m playwright install' to download the required browsers.",
+                        "symbol": "browser_search",
+                        "success": False
+                    }
+            except Exception as e:
+                logger.error(f"Error checking Playwright installation: {e}")
+                return {
+                    "error": f"Failed to get data for browser_search: Error checking Playwright installation: {str(e)}",
+                    "symbol": "browser_search",
+                    "success": False
+                }
+        except ImportError:
+            # If playwright is not installed, this will be caught by the BROWSER_USE_AVAILABLE check above
+            pass
+        
         # Check if Groq API key is available
         if not self.groq_api_key:
             logger.error("Groq API key not found")
@@ -132,22 +173,77 @@ class BrowserSearchTool(BaseTool):
         
         try:
             # Initialize the browser agent with Groq API (OpenAI compatible)
+            # Configure the OpenAI client for Groq
             openai_client = openai.OpenAI(
                 base_url="https://api.groq.com/openai/v1",
                 api_key=self.groq_api_key
             )
             
-            agent = BrowserAgent(
-                task=query,
-                llm=ChatOpenAI(
-                    model="llama3-70b-8192",  # Using Groq's model
-                    openai_api_key=self.groq_api_key,
-                    openai_api_base="https://api.groq.com/openai/v1"
-                ),
-                max_steps=max_steps
+            # Create a ChatOpenAI instance from langchain_openai instead of using OpenAI client directly
+            # This provides the necessary methods expected by BrowserAgent
+            from langchain.schema.messages import HumanMessage, AIMessage, SystemMessage
+            
+            # Define a custom message formatter to ensure content is always a string
+            def groq_message_formatter(messages):
+                formatted_messages = []
+                for message in messages:
+                    if isinstance(message, (HumanMessage, AIMessage, SystemMessage)):
+                        # Ensure content is always a string
+                        if message.content is None:
+                            content = ""
+                        elif isinstance(message.content, str):
+                            content = message.content
+                        else:
+                            # Convert non-string content to string
+                            content = str(message.content)
+                        
+                        # Create a properly formatted message dict
+                        formatted_message = {
+                            "role": message.type,
+                            "content": content
+                        }
+                        formatted_messages.append(formatted_message)
+                    else:
+                        # Handle dict-style messages
+                        formatted_message = dict(message)
+                        if "content" in formatted_message and formatted_message["content"] is not None:
+                            if not isinstance(formatted_message["content"], str):
+                                formatted_message["content"] = str(formatted_message["content"])
+                        else:
+                            formatted_message["content"] = ""
+                        formatted_messages.append(formatted_message)
+                return formatted_messages
+            
+            chat_model = ChatOpenAI(
+                model="llama3-70b-8192",  # Use an appropriate Groq model
+                openai_api_key=self.groq_api_key,
+                openai_api_base="https://api.groq.com/openai/v1",
+                # Add custom message formatter to ensure content is always a string
+                message_formatter=groq_message_formatter
             )
             
-            # Run the agent
+            # Create the browser agent with proper async configuration
+            # Initialize browser with proper configuration
+            from browser_use.browser.browser import Browser, BrowserConfig
+            
+            # Create a browser instance first
+            browser = Browser(
+                config=BrowserConfig(
+                    headless=False,  # Set to False for visibility, True for headless mode
+                    disable_security=True  # Disable security for better compatibility
+                )
+            )
+            
+            # Create the agent with the browser instance
+            agent = BrowserAgent(
+                task=query,
+                llm=chat_model,  # Use the ChatOpenAI instance with message formatter
+                browser=browser  # Pass the browser instance instead of browser_config
+            )
+                
+            # Run the agent asynchronously
+            # The browser-use library's Agent.run() method is already async
+            # so we can await it directly
             result = await agent.run()
             
             # Format the response

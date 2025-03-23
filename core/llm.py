@@ -227,7 +227,7 @@ class LLMEngine:
                         fallback_result = await browser_tool.execute(query=search_query)
                         
                         # Add note that this is fallback data
-                        if not "error" in fallback_result:
+                        if "error" not in fallback_result:
                             fallback_result["fallback"] = True
                             fallback_result["original_tool"] = tool_name
                             return fallback_result
@@ -254,7 +254,7 @@ class LLMEngine:
                         fallback_result = await browser_tool.execute(query=search_query)
                         
                         # Add note that this is fallback data
-                        if not "error" in fallback_result:
+                        if "error" not in fallback_result:
                             fallback_result["fallback"] = True
                             fallback_result["original_tool"] = tool_name
                             return fallback_result
@@ -262,6 +262,43 @@ class LLMEngine:
                         logger.error(f"Browser search fallback also failed: {str(e)}")
             
             return {"error": f"Error executing tool: {str(e)}"}
+    
+    def _construct_fallback_query(self, tool_name: str, params: Dict[str, Any]) -> str:
+        """Construct a web search query based on the original tool and parameters.
+        
+        Args:
+            tool_name: The name of the original tool
+            params: The original tool parameters
+            
+        Returns:
+            A formatted web search query
+        """
+        if tool_name == "price_checker":
+            symbol = params.get("symbol", "").upper()
+            market_type = params.get("market_type", "auto")
+            
+            if market_type == "auto":
+                # Include both possibilities in the query
+                return f"What is the current price of {symbol} cryptocurrency or stock"
+            elif market_type == "crypto":
+                return f"What is the current price of {symbol} cryptocurrency"
+            else:
+                return f"What is the current price of {symbol} stock"
+                
+        elif tool_name == "market_trends":
+            market_type = params.get("market_type", "crypto")
+            category = params.get("category", "trending")
+            limit = params.get("limit", 5)
+            
+            if category == "gainers":
+                return f"What are the top {limit} gaining {market_type}s today"
+            elif category == "losers":
+                return f"What are the top {limit} losing {market_type}s today"
+            else:
+                return f"What are the trending {market_type}s today"
+        
+        # Default generic query
+        return f"Latest information about {' '.join(str(v) for v in params.values())}"
     
     async def generate_response(self, message: str, user_id: str, context: Optional[Dict[str, Any]] = None) -> str:
         """Generate a response to a user message using Groq LLM API.
@@ -326,10 +363,6 @@ class LLMEngine:
                 # Use fallback response if API call fails
                 logger.warning("API call failed, using fallback response")
                 return random.choice(self.fallback_responses)
-        else:
-            # Use fallback response if no API key is available
-            logger.warning("No Groq API key available, using fallback response")
-            return random.choice(self.fallback_responses)
     
     async def _call_groq_api(self, message: str, conversation_history: List[Dict[str, str]], tool_prompt: str = "") -> str:
         """Call the Groq LLM API to generate a response.
@@ -386,3 +419,7 @@ class LLMEngine:
                 
                 data = await response.json()
                 return data["choices"][0]["message"]["content"]
+        # If no API key is available, use fallback response
+            # Use fallback response if no API key is available
+            logger.warning("No Groq API key available, using fallback response")
+            return random.choice(self.fallback_responses)

@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["sturgis <sturgis.steele@outlook.com>"]
 readme = "README.md"
-packages = [{include = "trademaster2"}]
+# Removing the packages line as it's not needed
 
 [tool.poetry.dependencies]
 python = ">=3.12,<3.13"
@@ -19,7 +19,9 @@ langchain-community = "^0.3.19"
 crewai = "^0.102.0"
 langchain-groq = "^0.2.0"
 browser-use = "^0.1.0"
-langchain-openai = "^0.1.0"
+langchain-openai = "^0.2.0"
+langchain-core = "^0.3.45"
+playwright = "^1.51.0"
 
 
 [build-system]

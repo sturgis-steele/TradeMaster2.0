@@ -193,29 +193,7 @@ class PriceCheckerTool(BaseTool):
         
         # Fall back to public API
         return await self._make_coingecko_request(endpoint, coin_id, symbol, False, detailed)
-    
-    def get_coingecko_url(self, endpoint: str, use_pro: bool = True) -> Tuple[str, Dict[str, str], Dict[str, Any]]:
-        """Get the appropriate CoinGecko URL, headers, and params."""
-        api_key = self.coingecko_api_key
-        params = {}
         
-        # Ensure no leading slash in endpoint
-        if endpoint.startswith('/'):
-            endpoint = endpoint[1:]
-        
-        if api_key and use_pro:
-            base_url = self.COINGECKO_PRO_BASE_URL
-            # For Pro API, the key should be in the x-cg-pro-api-key header
-            headers = {"x-cg-pro-api-key": api_key}
-            logger.info(f"Using CoinGecko Pro API for endpoint: {endpoint}")
-            logger.info(f"API Key (partial): {self.sanitize_api_key(api_key)}")
-        else:
-            base_url = self.COINGECKO_BASE_URL
-            headers = {}
-            logger.info(f"Using CoinGecko Public API for endpoint: {endpoint}")
-        
-        return f"{base_url}/{endpoint}", headers, params
-    
     def _process_simple_coingecko_data(self, coin_data: Dict[str, Any], symbol: str, 
                                      coin_id: str, source: str) -> Dict[str, Any]:
         """Process data from CoinGecko simple/price endpoint."""
@@ -244,56 +222,121 @@ class PriceCheckerTool(BaseTool):
             "source": source
         }
     
+    def get_coingecko_url(self, endpoint: str, use_pro: bool = True) -> Tuple[str, Dict[str, str], Dict[str, Any]]:
+        """Get the appropriate CoinGecko URL, headers, and params."""
+        api_key = self.coingecko_api_key
+        params = {}
+        
+        # Ensure no leading slash in endpoint
+        if endpoint.startswith('/'):
+            endpoint = endpoint[1:]
+        
+        if api_key and use_pro:
+            base_url = self.COINGECKO_PRO_BASE_URL
+            # For Pro API, the key should be in the x-cg-pro-api-key header
+            headers = {"x-cg-pro-api-key": api_key}
+            logger.info(f"Using CoinGecko Pro API for endpoint: {endpoint}")
+            logger.info(f"API Key (partial): {self.sanitize_api_key(api_key)}")
+        else:
+            base_url = self.COINGECKO_BASE_URL
+            headers = {}
+            logger.info(f"Using CoinGecko Public API for endpoint: {endpoint}")
+        
+        return f"{base_url}/{endpoint}", headers, params
+        
+    def sanitize_api_key(self, value: str, mask: bool = True) -> str:
+        """Sanitize an API key for logging by showing only part of it."""
+        if not value or not mask:
+            return value
+        
+        if len(value) <= 8:
+            return "***" + value[-2:] if len(value) > 2 else "***"
+        else:
+            return value[:4] + "..." + value[-4:]
+    
+    async def _make_coingecko_request(self, endpoint: str, coin_id: str, symbol: str, 
+                                   use_pro: bool = False, detailed: bool = False) -> Dict[str, Any]:
+        """Make a request to the CoinGecko API with appropriate parameters."""
+        if endpoint.startswith('simple/price'):
+            # For simple price endpoint
+            url, headers, params = self.get_coingecko_url(endpoint, use_pro)
+            params.update({
+                "ids": coin_id,
+                "vs_currencies": "usd",
+                "include_market_cap": "true",
+                "include_24hr_vol": "true",
+                "include_24hr_change": "true"
+            })
+            
+            # Make API request
+            source = "CoinGecko Pro" if use_pro else "CoinGecko"
+            logger.info(f"Getting {symbol} price from {source} simple/price endpoint")
+            success, data = await self.make_api_request(url, headers, params)
+            
+            if not success:
+                return data  # Error response is already formatted
+            
+            # Check if we have data for the requested coin
+            if coin_id not in data:
+                return self.format_error_response(symbol, "Symbol not found")
+            
+            # Process and format the data
+            return self._process_simple_coingecko_data(data[coin_id], symbol, coin_id, source)
+            
+        elif endpoint.startswith('coins/'):
+            # For detailed coin endpoint
+            url, headers, params = self.get_coingecko_url(endpoint, use_pro)
+            
+            # Make API request
+            source = "CoinGecko Pro" if use_pro else "CoinGecko"
+            logger.info(f"Getting {symbol} price from {source} detailed endpoint")
+            success, data = await self.make_api_request(url, headers, params)
+            
+            if not success:
+                return data  # Error response is already formatted
+            
+            # Check if we have the expected data structure
+            if "id" not in data:
+                return self.format_error_response(symbol, "Invalid response data structure")
+            
+            # Process and format the data
+            return self._process_detailed_coingecko_data(data, symbol, source)
+        
+        else:
+            return self.format_error_response(symbol, f"Unsupported endpoint: {endpoint}")
+            
     async def _get_stock_price(self, symbol: str) -> Dict[str, Any]:
-        """Get stock price from Alpha Vantage."""
+        """Get stock price from Alpha Vantage API."""
         if not self.alphavantage_api_key:
             return self.format_error_response(symbol, "Alpha Vantage API key not configured")
         
-        symbol_upper = symbol.upper()
-        
-        # Use Global Quote endpoint to get current price data
         url = self.ALPHAVANTAGE_BASE_URL
         params = {
             "function": "GLOBAL_QUOTE",
-            "symbol": symbol_upper,
+            "symbol": symbol,
             "apikey": self.alphavantage_api_key
         }
         
-        logger.info(f"Getting stock price for {symbol_upper} from Alpha Vantage")
-        success, data = await self.make_api_request(url, {}, params)
+        logger.info(f"Getting {symbol} price from Alpha Vantage")
+        success, data = await self.make_api_request(url, params=params)
         
         if not success:
-            return data  # Return error response
+            return data  # Error response is already formatted
         
-        # Check for API errors or empty responses
-        if "Error Message" in data:
-            return self.format_error_response(symbol_upper, data["Error Message"])
+        # Check if we have the expected data structure
+        if "Global Quote" not in data or not data["Global Quote"]:
+            return self.format_error_response(symbol, "Symbol not found or invalid response")
         
-        # Extract the quote data
-        quote_data = data.get("Global Quote", {})
-        if not quote_data:
-            return self.format_error_response(symbol_upper, "No data found")
+        quote = data["Global Quote"]
         
-        # Process the data
-        try:
-            price = float(quote_data.get("05. price", 0))
-            change = float(quote_data.get("09. change", 0))
-            change_percent = float(quote_data.get("10. change percent", "0%").replace("%", ""))
-            volume = int(quote_data.get("06. volume", 0))
-            
-            return {
-                "symbol": symbol_upper,
-                "name": symbol_upper,  # Alpha Vantage doesn't provide company name in this endpoint
-                "price_usd": price,
-                "price_change_24h": change_percent,
-                "change_amount": change,
-                "volume_24h": volume,
-                "time": datetime.now().isoformat(),
-                "source": "Alpha Vantage"
-            }
-        except (ValueError, TypeError) as e:
-            logger.error(f"Error processing Alpha Vantage data: {e}")
-            return self.format_error_response(symbol_upper, f"Error processing data: {str(e)}")
-        
-        # If we get here, something unexpected happened
-        return self.format_error_response(symbol_upper, "Failed to retrieve stock price data")
+        # Process and format the data
+        return {
+            "symbol": symbol,
+            "name": symbol,  # Alpha Vantage doesn't provide name in this endpoint
+            "price_usd": float(quote.get("05. price", 0)),
+            "price_change_24h": float(quote.get("10. change percent", "0%").replace("%", "")),
+            "market_cap": None,  # Not provided in this endpoint
+            "volume_24h": float(quote.get("06. volume", 0)),
+            "time": datetime.now().isoformat(),
+            "source": "Alpha Vantage"
+        }
