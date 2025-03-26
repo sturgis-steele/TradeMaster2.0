@@ -219,20 +219,22 @@ class LLMEngine:
                 # Construct an appropriate search query based on the original tool and params
                 search_query = self._construct_fallback_query(tool_name, params)
                 
-                # Execute browser search as fallback
-                browser_tool = registry.get_tool("browser_search")
-                if browser_tool:
-                    logger.info(f"Executing browser_search fallback with query: {search_query}")
-                    try:
-                        fallback_result = await browser_tool.execute(query=search_query)
-                        
-                        # Add note that this is fallback data
-                        if "error" not in fallback_result:
-                            fallback_result["fallback"] = True
-                            fallback_result["original_tool"] = tool_name
-                            return fallback_result
-                    except Exception as e:
-                        logger.error(f"Browser search fallback also failed: {str(e)}")
+                # Use browser search as fallback
+                logger.info(f"Using browser search fallback with query: {search_query}")
+                browser_result = await self._execute_tool("browser_search", {
+                    "query": search_query,
+                    "search_type": "price" if tool_name == "price_checker" else "trends"
+                })
+                
+                if "error" not in browser_result:
+                    logger.info("Browser search fallback successful")
+                    # Add a note that this is fallback data
+                    browser_result["note"] = f"This data was obtained via web search fallback because the {tool_name} API failed"
+                    return browser_result
+                else:
+                    logger.warning(f"Browser search fallback also failed: {browser_result['error']}")
+                    # Return the original error result
+                    return result
             
             return result
         except Exception as e:
@@ -246,20 +248,21 @@ class LLMEngine:
                 # Construct an appropriate search query based on the original tool and params
                 search_query = self._construct_fallback_query(tool_name, params)
                 
-                # Execute browser search as fallback
-                browser_tool = registry.get_tool("browser_search")
-                if browser_tool:
-                    logger.info(f"Executing browser_search fallback with query: {search_query}")
-                    try:
-                        fallback_result = await browser_tool.execute(query=search_query)
-                        
-                        # Add note that this is fallback data
-                        if "error" not in fallback_result:
-                            fallback_result["fallback"] = True
-                            fallback_result["original_tool"] = tool_name
-                            return fallback_result
-                    except Exception as e:
-                        logger.error(f"Browser search fallback also failed: {str(e)}")
+                # Use browser search as fallback
+                logger.info(f"Using browser search fallback with query: {search_query}")
+                browser_result = await self._execute_tool("browser_search", {
+                    "query": search_query,
+                    "search_type": "price" if tool_name == "price_checker" else "trends"
+                })
+                
+                if "error" not in browser_result:
+                    logger.info("Browser search fallback successful")
+                    # Add a note that this is fallback data
+                    browser_result["note"] = f"This data was obtained via web search fallback because the {tool_name} API failed with an exception"
+                    return browser_result
+                else:
+                    logger.warning(f"Browser search fallback also failed: {browser_result['error']}")
+                    # Return the original error
             
             return {"error": f"Error executing tool: {str(e)}"}
     
